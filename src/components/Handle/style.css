@@ -1,0 +1,13 @@
+.flowchart-editor_handle{
+    position: absolute;
+    right: -5px;
+    top: 50%;
+    transform: translate(0, -50%);
+    width: 10px;
+    height: 10px;
+    background: black;
+    border-radius: 50%;
+    cursor: pointer;
+    pointer-events: all;
+    z-index: 6;
+}

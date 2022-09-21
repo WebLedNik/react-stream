@@ -1,0 +1,14 @@
+.flowchart-editor_line{}
+.flowchart-editor_line-path{
+    cursor: pointer;
+    stroke: black;
+    stroke-width: 2;
+    fill: transparent;
+}
+.flowchart-editor_line-path._selected{
+    stroke: blue;
+}
+.flowchart-editor_handle-line{
+    cursor: pointer;
+    fill: transparent;
+}

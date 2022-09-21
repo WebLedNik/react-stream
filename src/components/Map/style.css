@@ -1,0 +1,8 @@
+.flowchart-editor_map{
+    position: absolute;
+    bottom: 15px;
+    right: 20px;
+    z-index: 10;
+    background: white;
+    border-radius: 8px;
+}

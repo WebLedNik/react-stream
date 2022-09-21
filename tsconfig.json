@@ -2,8 +2,8 @@
   "compilerOptions": {
     "outDir": "build/dist",
     "module": "ESNext",
-    "target": "es5",
-    "lib": ["es6", "dom"],
+    "target": "es6",
+    "lib": ["es5", "es6", "dom", "dom.iterable"],
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
@@ -16,7 +16,7 @@
     "strictNullChecks": true
   },
   "exclude": [
-    "node_modules",
+    "example/node_modules",
     "build",
     "scripts",
     "acceptance-tests",
