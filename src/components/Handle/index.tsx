@@ -1,12 +1,13 @@
 import * as React from 'react'
+import {useEffect, useMemo, useRef} from 'react'
 import './style.css'
-import { v4 as uuidv4 } from 'uuid';
-import {useCallback, useEffect, useMemo, useRef} from "react";
+import {v4 as uuidv4} from 'uuid';
 import {select} from "d3-selection";
 import {FlowchartEditorState, useStore} from "../../store";
 import {LineDTO} from "../Line";
 import {NodeState} from "../Node";
 import {getRelativePosition} from "../../utils";
+import {Orientation} from "../../types";
 
 interface HandleProps{
   node: NodeState
@@ -15,7 +16,7 @@ const Handle: React.FC<HandleProps> = (props) => {
   const {node} = props
   const handleRef = useRef(null)
   const {zoomTransformState, setLines}: FlowchartEditorState = useStore((state) => state)
-  const handleID = useMemo(() => uuidv4(), [])
+  const handleId = useMemo(() => uuidv4(), [])
 
   useEffect(() => {
     const selection = select(handleRef.current)
@@ -33,16 +34,16 @@ const Handle: React.FC<HandleProps> = (props) => {
       const y = node.position.y + (event.target.clientHeight / 2) +  (handleRelativePos.y / zoomTransformState.k)
 
       const payload: LineDTO = {
-        source: {id: handleID, position: {x,y}},
+        source: {id: handleId, position: {x,y}},
         target: {position: {x,y}},
-        transforming: true
+        creating: true
       }
 
       setLines([payload])
     })
   }, [node, zoomTransformState])
 
-  return <div className={'flowchart-editor_handle'} ref={handleRef} data-id={handleID} data-parent={node.id}/>
+  return <div className={'flowchart-editor_handle'} ref={handleRef} data-id={handleId} data-parent={node.id}/>
 }
 
 Handle.displayName = 'Handle'

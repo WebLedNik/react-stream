@@ -1,5 +1,5 @@
 import * as React from 'react'
-import {forwardRef, useEffect, useRef} from "react";
+import {forwardRef, useEffect, useRef} from 'react'
 import './style.css'
 import {FlowchartEditorState, useStore} from "../../store";
 import {select} from "d3-selection";
@@ -7,7 +7,8 @@ import {drag} from "d3-drag";
 import {NodeState} from "./types";
 import {getRelativePosition, getTransformTranslateStyle} from "../../utils";
 import Handle from "../Handle";
-import {LineState} from "../Line";
+import {Part} from "../Line";
+import {Orientation} from "../../types";
 
 export interface NodeProps{
   node: NodeState
@@ -28,8 +29,38 @@ const Node = forwardRef<NodePropsRef, NodeProps>((props, ref) => {
         x: elementPos.x + (handle.clientWidth / 2) + (handleRelativePos.x / zoomTransformState.k),
         y: elementPos.y + (handle.clientHeight / 2) + (handleRelativePos.y / zoomTransformState.k)
       }
-      const updatedSourceLines = lines.filter(line => line.source.id === (handle as HTMLElement).dataset.id)?.map(line => ({...line, source: {...line.source, position: {...position}}}))
-      const updatedTargetLines = lines.filter(line => line.target.id === (handle as HTMLElement).dataset.id)?.map(line => ({...line, target: {...line.target, position: {...position}}}))
+      const updatedSourceLines = lines.filter(line => line.source.id === (handle as HTMLElement).dataset.id)?.map(line => {
+        const source = {...line.source, position}
+
+        if (line.parts.length > 1){
+          const firstPart: Part =  {
+            ...line.parts[0],
+            start: source.position,
+            end: (line.parts[0].orientation === Orientation.Horizontal) ? {x: line.parts[0].end.x, y: source.position.y} : {x: source.position.x, y: line.parts[0].end.y}
+          }
+          const secondPart: Part = {
+            ...line.parts[1],
+            start: firstPart.end
+          }
+
+          const parts: Part[] = [firstPart, secondPart, ...line.parts.slice(2)]
+          return {...line, parts, source}
+        }
+
+        const parts: Part[] = [
+          {
+            ...line.parts[0],
+            start: source.position,
+            end: (line.parts[0].orientation === Orientation.Horizontal) ? {x: line.parts[0].end.x, y: source.position.y} : {x: source.position.x, y: line.parts[0].end.y}
+          },
+          ...line.parts.slice(1)
+        ]
+        return {...line, parts, source}
+      })
+      const updatedTargetLines = lines.filter(line => line.target.id === (handle as HTMLElement).dataset.id)?.map(line => {
+        const target = {...line.target, position}
+        return {...line, target}
+      })
       const payload = [...updatedSourceLines, ...updatedTargetLines]
 
       updateLines(payload)

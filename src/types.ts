@@ -9,3 +9,8 @@ export enum Directions {
   Bottom = "bottom",
   Left = "left"
 };
+
+export enum Orientation {
+  Horizontal = "horizontal",
+  Vertical = "vertical"
+};

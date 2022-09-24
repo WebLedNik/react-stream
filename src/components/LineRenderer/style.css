@@ -7,6 +7,12 @@
     overflow: visible;
     z-index: 0;
 }
+.flowchart-editor_line-marker{
+
+}
 .flowchart-editor_line-marker polyline{
-    stroke: black;
+
+}
+.flowchart-editor_line-marker._updating{
+    fill: blue;
 }

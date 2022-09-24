@@ -1,4 +1,4 @@
-import {Directions, Position} from "../types";
+import {Directions, Orientation, Position} from "../types";
 
 export function getTransformTranslateScaleStyle(position: Position & {k: number}){
   return `transform: translate(${position.x}px, ${position.y}px) scale(${position.k})`
@@ -30,14 +30,6 @@ const normalize = ( vector: Position ) => {
 };
 const subtract = ( a: {x: number, y: number}, b: {x: number, y: number} ) => ({ x: a.x - b.x, y: a.y - b.y });
 
-interface GetDirectionCursorProps{
-  clientX: number,
-  clientY: number,
-  rootX?: number,
-  rootY?: number,
-  rootElement?: Element,
-}
-
 function getCenterPositionElement(element: Element){
   const rectangle = element.getBoundingClientRect();
   return point(
@@ -46,6 +38,13 @@ function getCenterPositionElement(element: Element){
   );
 }
 
+interface GetDirectionCursorProps{
+  clientX: number,
+  clientY: number,
+  rootX?: number,
+  rootY?: number,
+  rootElement?: Element,
+}
 export function getDirectionCursor(props: GetDirectionCursorProps){
   const {rootElement,clientX,clientY, rootX, rootY} = props
   if (!rootX && !rootY && !rootElement) return
@@ -61,4 +60,17 @@ export function getDirectionCursor(props: GetDirectionCursorProps){
   if( angle > 45 && angle <= 130 ) return Directions.Bottom;
 
   return Directions.Right;
+}
+
+export function getOrientation(direction: Directions): Orientation{
+  switch (direction){
+    case Directions.Right:
+      return Orientation.Horizontal
+    case Directions.Left:
+      return Orientation.Horizontal
+    case Directions.Top:
+      return Orientation.Vertical
+    case Directions.Bottom:
+      return Orientation.Vertical
+  }
 }
