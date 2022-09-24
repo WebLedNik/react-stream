@@ -1,11 +1,13 @@
 import * as React from "react";
+import {useEffect, useMemo, useRef, useState} from "react";
 import './style.css'
 import {LineState} from "./types";
-import {useEffect, useRef, useState} from "react";
 import {FlowchartEditorState, useStore} from "../../store";
 import {select} from "d3-selection";
-import cc from 'classcat'
-import {getDirectionCursor} from "../../utils";
+import {getDirectionCursor, getOrientation} from "../../utils";
+import {Directions, Orientation, Position} from "../../types";
+import {Path} from "./utils";
+import PathComponent from "./Path"
 
 interface LineProps {
   line: LineState
@@ -17,13 +19,22 @@ const Line: React.FC<LineProps> = (props) => {
   const handleLineTargetRef = useRef(null)
   const {zoomTransformState, updateLines}: FlowchartEditorState = useStore((state) => state)
 
-  const [mouseMovePosition, setMouseMovePosition] = useState<LineState['target']['position'] | null>(null)
+  const [mouseMovePosition, setMouseMovePosition] = useState<Position | null>(null)
+  const [countPathDraw, setCountPathDraw] = useState<number>(0)
 
-  const moveToPosition: LineState['target']['position'] = {x: line.source.position.x, y: line.source.position.y}
-  const lineToPosition: LineState['target']['position'] = {
-    x: mouseMovePosition?.x ?? line.target.position.x,
-    y: mouseMovePosition?.y ?? line.target.position.y
-  }
+  const sourcePosition: Position = useMemo(() => line.source.position, [line])
+  const targetPosition: Position = useMemo(() => mouseMovePosition ?? line.target.position, [line, mouseMovePosition])
+  const paths = useMemo(() => line.paths.map((path, index, array) => {
+    if (index === 0) {
+      return {...path, moveTo: {...line.source.position}}
+    }
+
+    if (index === (array.length - 1)) {
+      return {...path, lineTo: {...line.target.position}}
+    }
+
+    return path
+  }), [line, sourcePosition, targetPosition])
 
   const handleMouseUp = (event: MouseEvent) => {
     event.stopPropagation()
@@ -40,24 +51,64 @@ const Line: React.FC<LineProps> = (props) => {
       target: {position: {x, y}}
     }
 
-    setMouseMovePosition(null)
     updateLines([payload])
+    setMouseMovePosition(null)
   }
   const handleMouseMove = (event: MouseEvent) => {
     event.stopPropagation()
     event.preventDefault()
 
-    const MARGIN = 20
-    const rootElement = window.document.querySelectorAll(`[data-id='${line.source.id}']`)[0]
-    const rootX = line.target.position.x - MARGIN
-    const rootY = line.target.position.y - MARGIN
-
-    console.log(getDirectionCursor({clientX: event.clientX, clientY: event.clientY, rootX, rootY}))
-
-    if (!line.transforming) return
-
+    const maxCountPathDraw = 1
+    const margin = 20
     const x = (event.x - zoomTransformState.x) / zoomTransformState.k
     const y = (event.y - zoomTransformState.y) / zoomTransformState.k
+    const currentPath = line.paths[line.paths.length - 1]
+
+    if (!currentPath || !line.transforming) return;
+
+    const orientation = getOrientation(currentPath.direction)
+    const isVertical = Boolean(currentPath.direction === Directions.Bottom || currentPath.direction === Directions.Top)
+    const rootX = (orientation === Orientation.Horizontal) ? (Number(mouseMovePosition?.x) - margin) : currentPath.lineTo.x
+    const rootY = (orientation === Orientation.Vertical) ? (Number(mouseMovePosition?.y) - margin) : currentPath.lineTo.y
+    const direction = getDirectionCursor({clientX: x, clientY: y, rootX, rootY})
+
+    if (countPathDraw > maxCountPathDraw) {
+      const lastDrawnPaths = line.paths.slice(-2)
+      const current = (orientation === Orientation.Vertical) ? lastDrawnPaths.find(path => getOrientation(path.direction) === Orientation.Vertical) : lastDrawnPaths.find(path => getOrientation(path.direction) === Orientation.Horizontal)
+
+      if (!current) return;
+      console.log({current})
+      const paths = line.paths.map(path => {
+        if (path.id === current.id){
+          return {...path, lineTo: {x,y}}
+        }
+
+        return path
+      })
+
+      const payload: LineState = {
+        ...line,
+        paths: paths
+      }
+
+      console.log({paths})
+      return
+    }
+
+    if (direction && direction !== currentPath.direction) {
+      setCountPathDraw((param) => ++param)
+      const path = new Path({
+        direction,
+        moveTo: {x: x - (isVertical ? margin : 0), y: y - (!isVertical ? margin : 0)},
+        lineTo: {x, y}
+      })
+      const payload: LineState = {
+        ...line,
+        paths: [...line.paths, path]
+      }
+
+      updateLines([payload])
+    }
 
     setMouseMovePosition({x, y})
   }
@@ -90,25 +141,15 @@ const Line: React.FC<LineProps> = (props) => {
   }, [line, zoomTransformState])
 
   window.document.getElementsByClassName('flowchart-editor')[0]?.addEventListener('mousemove', handleMouseMove, {once: true})
-
+  // console.log('LineComponent', {props})
   return (
     <g className={'flowchart-editor_line'}>
       {!Boolean(line.source.id) &&
-        <circle className={'flowchart-editor_handle-line'} cx={moveToPosition.x} cy={moveToPosition.y} r={12}/>}
-      <path
-        ref={pathRef}
-        className={cc([
-          'flowchart-editor_line-path',
-          {
-            ['_selected']: line.selected
-          }
-        ])}
-        d={`M ${moveToPosition.x} ${moveToPosition.y} L ${lineToPosition.x} ${lineToPosition.y}`}
-        markerEnd={'url(#handle-line-target)'}
-      />
+        <circle className={'flowchart-editor_handle-line'} cx={sourcePosition.x} cy={sourcePosition.y} r={12}/>}
+      {paths.map(path => <PathComponent key={path.id} path={path} mousePosition={mouseMovePosition}/>)}
       {!Boolean(line.target.id) &&
-        <circle ref={handleLineTargetRef} className={'flowchart-editor_handle-line'} cx={lineToPosition.x}
-                cy={lineToPosition.y} r={12}/>}
+        <circle ref={handleLineTargetRef} className={'flowchart-editor_handle-line'} cx={targetPosition.x}
+                cy={targetPosition.y} r={12}/>}
     </g>
   )
 }

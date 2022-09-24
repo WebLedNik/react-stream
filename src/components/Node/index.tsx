@@ -7,7 +7,6 @@ import {drag} from "d3-drag";
 import {NodeState} from "./types";
 import {getRelativePosition, getTransformTranslateStyle} from "../../utils";
 import Handle from "../Handle";
-import {LineState} from "../Line";
 
 export interface NodeProps{
   node: NodeState

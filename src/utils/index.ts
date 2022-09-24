@@ -1,4 +1,4 @@
-import {Directions, Position} from "../types";
+import {Directions, Orientation, Position} from "../types";
 
 export function getTransformTranslateScaleStyle(position: Position & {k: number}){
   return `transform: translate(${position.x}px, ${position.y}px) scale(${position.k})`
@@ -61,4 +61,17 @@ export function getDirectionCursor(props: GetDirectionCursorProps){
   if( angle > 45 && angle <= 130 ) return Directions.Bottom;
 
   return Directions.Right;
+}
+
+export function getOrientation(direction: Directions): Orientation{
+  switch (direction){
+    case Directions.Right:
+      return Orientation.Horizontal
+    case Directions.Left:
+      return Orientation.Horizontal
+    case Directions.Top:
+      return Orientation.Vertical
+    case Directions.Bottom:
+      return Orientation.Vertical
+  }
 }

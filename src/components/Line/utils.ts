@@ -1,5 +1,20 @@
-import { v4 as uuidv4 } from 'uuid';
-import {LineDTO, LineValues} from "./types";
+import {v4 as uuidv4} from 'uuid';
+import {LineDTO, LineValues, PathDTO, PathValues} from "./types";
+import {Directions, Position} from "../../types";
+
+export class Path implements PathValues{
+  id: string
+  direction: Directions;
+  lineTo: Position;
+  moveTo: Position;
+
+  constructor(payload: PathDTO) {
+    this.id = uuidv4()
+    this.direction = payload.direction
+    this.lineTo = payload.lineTo
+    this.moveTo = payload.moveTo
+  }
+}
 
 export class Line implements LineValues{
   id: string;
