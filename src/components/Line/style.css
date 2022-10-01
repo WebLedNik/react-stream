@@ -1,12 +1,19 @@
 .flowchart-editor_line{}
 .flowchart-editor_line-path{
-    cursor: pointer;
     stroke: black;
     stroke-width: 2;
-    fill: transparent;
+    fill: none;
 }
 .flowchart-editor_line-path._selected{
+    stroke: cornflowerblue;
+}
+.flowchart-editor_line-path._updating{
     stroke: blue;
+    stroke-linecap: butt;
+    stroke-opacity: 1;
+    stroke-miterlimit: 4;
+    stroke-dasharray: 6, 4;
+    stroke-dashoffset: 0;
 }
 .flowchart-editor_handle-line{
     cursor: pointer;

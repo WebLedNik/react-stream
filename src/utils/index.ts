@@ -30,14 +30,6 @@ const normalize = ( vector: Position ) => {
 };
 const subtract = ( a: {x: number, y: number}, b: {x: number, y: number} ) => ({ x: a.x - b.x, y: a.y - b.y });
 
-interface GetDirectionCursorProps{
-  clientX: number,
-  clientY: number,
-  rootX?: number,
-  rootY?: number,
-  rootElement?: Element,
-}
-
 function getCenterPositionElement(element: Element){
   const rectangle = element.getBoundingClientRect();
   return point(
@@ -46,6 +38,13 @@ function getCenterPositionElement(element: Element){
   );
 }
 
+interface GetDirectionCursorProps{
+  clientX: number,
+  clientY: number,
+  rootX?: number,
+  rootY?: number,
+  rootElement?: Element,
+}
 export function getDirectionCursor(props: GetDirectionCursorProps){
   const {rootElement,clientX,clientY, rootX, rootY} = props
   if (!rootX && !rootY && !rootElement) return

@@ -1,35 +1,29 @@
-import {Directions, Position} from "../../types";
+import {Directions, Orientation, Position} from "../../types";
+import {HandleState} from "../Handle/types";
 
-export interface PathValues{
+export interface Part{
   id: string
-  direction: Directions
-  moveTo: Position
-  lineTo: Position
-}
-
-export interface PathDTO{
-  direction: Directions
-  moveTo: Position
-  lineTo: Position
-  source?: string
-  target?: string
-  paths?: Array<PathValues['id']>
+  start: Position
+  end: Position
+  orientation: Orientation
 }
 
 export interface LineDTO{
-  source: { id?: string, position: Position }
-  target: { id?: string, position: Position }
-  paths?: PathValues[]
-  transforming?: boolean
+  source: { handle: HandleState, position: Position }
+  target: { handle?: HandleState, position?: Position }
+  parts?: Part[]
+  creating?: boolean
+  updating?: boolean
   selected?:boolean
 }
 
 export interface LineValues{
   id: string
-  source: { id?: string, position: Position }
-  target: { id?: string, position: Position }
-  paths: PathValues[]
-  transforming: boolean
+  source: { handle: HandleState, position: Position }
+  target: { handle?: HandleState, position?: Position }
+  parts: Part[]
+  creating: boolean
+  updating: boolean
   selected: boolean
 }
 

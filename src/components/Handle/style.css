@@ -1,8 +1,6 @@
 .flowchart-editor_handle{
     position: absolute;
-    right: -5px;
-    top: 50%;
-    transform: translate(0, -50%);
+
     width: 10px;
     height: 10px;
     background: black;
@@ -10,4 +8,31 @@
     cursor: pointer;
     pointer-events: all;
     z-index: 6;
+}
+
+.flowchart-editor_handle._top{
+    top: -5px;
+    left: 50%;
+    transform: translate(-50%, 0);
+}
+.flowchart-editor_handle._right{
+    right: -5px;
+    top: 50%;
+    transform: translate(0, -50%);
+}
+.flowchart-editor_handle._left{
+    left: -5px;
+    top: 50%;
+    transform: translate(0, -50%);
+}
+.flowchart-editor_handle._bottom{
+    left: 50%;
+    bottom: -5px;
+    transform: translate(-50%, 0);
+}
+.flowchart-editor_handle._input{
+    background: #0f3d02;
+}
+.flowchart-editor_handle._output{
+    background: #420202;
 }
