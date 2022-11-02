@@ -3,10 +3,10 @@ import {FlowchartEditorState, FlowchartEditorValues} from "./types";
 import create from "zustand";
 import {zoomIdentity, ZoomTransform} from "d3-zoom";
 import {Node, NodeDTO, NodeState} from "../components/Node";
-import {Line, LineDTO, LineState} from "../components/Line";
+import {Line, LineDTO, LineState, LineValues} from "../components/Line";
 
 // @ts-ignore
-const {Provider, useStore, useStoreApi} = createContext<FlowchartEditorState>()
+const {Provider, useStore, useStoreApi } = createContext<FlowchartEditorState>()
 
 const initialState:FlowchartEditorValues = {
   width: 0,
@@ -48,10 +48,7 @@ const createStore = () => create<FlowchartEditorState>((setState, getState) => (
     const payload = getState().lines.map(line => {
       const updatedLine = lines.find(item => item.id === line.id)
 
-      if (updatedLine){
-        return {...line, ...updatedLine}
-      }
-
+      if (updatedLine) return updatedLine
       return line
     })
 

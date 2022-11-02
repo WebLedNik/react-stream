@@ -8,18 +8,20 @@ import {FlowchartEditorState, useStore} from "../../store";
 import {MarkerProps, MarkerTypeNames} from "../LineRenderer/types";
 
 export interface PathProps {
+  id: string
   parts: Part[]
   onClick?(event: React.MouseEvent): void
   onMouseDown?(event: MouseEvent, part: Part): void
-  onMouseOver?(event: MouseEvent, part: Part): void
+  onMouseEnter?(event: MouseEvent, part: Part): void
+  onMouseLeave?(event: MouseEvent, part: Part): void
   updating?: boolean
   selected?: boolean
   MarkerProps?: MarkerProps
 }
 
 const Path: React.FC<PathProps> = (props) => {
-  const {parts, updating, selected, MarkerProps, onClick, onMouseDown, onMouseOver} = props
-  const { lines}: FlowchartEditorState = useStore((state) => state)
+  const {id, parts, updating, selected, MarkerProps, onClick, onMouseDown, onMouseEnter, onMouseLeave} = props
+  const {lines}: FlowchartEditorState = useStore((state) => state)
   const pathRef = useRef(null)
   const d: string = useMemo(() => {
     const transformedParts = parts.slice()
@@ -39,7 +41,7 @@ const Path: React.FC<PathProps> = (props) => {
 
   const cursor = useMemo(() => (transformingPart?.orientation === Orientation.Horizontal) ? 'row-resize' : 'col-resize', [transformingPart])
 
-  const handleMouseOver = (event: MouseEvent) => {
+  const handleMouseEnter = (event: MouseEvent) => {
     event.stopPropagation()
     event.preventDefault()
 
@@ -52,8 +54,24 @@ const Path: React.FC<PathProps> = (props) => {
 
     if (!payloadTargetPart) return
 
-    onMouseOver && onMouseOver(event, payloadTargetPart)
+    onMouseEnter && onMouseEnter(event, payloadTargetPart)
     return setTransformingPart(payloadTargetPart)
+  }
+
+  const handleMouseLeave = (event: MouseEvent) => {
+    event.stopPropagation()
+    event.preventDefault()
+
+    const margin = 5
+    const offsetX = event.offsetX
+    const offsetY = event.offsetY
+    const targetPart = parts.find(p => (offsetX >= (p.start.x - margin)) && (offsetX <= (p.end.x + margin)) && (offsetY >= (p.start.y - margin)) && (offsetY <= (p.end.y + margin)))
+    const invertTargetPart = parts.find(p => (offsetX <= (p.start.x + margin)) && (offsetX >= (p.end.x - margin)) && (offsetY <= (p.start.y + margin)) && (offsetY >= (p.end.y - margin)))
+    const payloadTargetPart = targetPart ?? invertTargetPart
+
+    if (!payloadTargetPart) return
+
+    onMouseLeave && onMouseLeave(event, payloadTargetPart)
   }
 
   const handleClick = (event: React.MouseEvent) => {
@@ -72,12 +90,15 @@ const Path: React.FC<PathProps> = (props) => {
     const selection = select(pathRef.current)
 
     selection.on('mousedown', handleMouseDown)
-    selection.on('mouseover', handleMouseOver)
+    selection.on('mouseenter', handleMouseEnter)
+    selection.on('mouseleave', handleMouseLeave)
     selection.on('click', handleClick)
   }, [parts, transformingPart, lines])
 
   return (
+    <>
     <path
+      id={id}
       ref={pathRef}
       className={cc(['flowchart-editor_line-path', {['_updating']: updating, ['_selected']: selected}])}
       d={d}
@@ -86,6 +107,7 @@ const Path: React.FC<PathProps> = (props) => {
       onClick={handleClick}
       cursor={cursor}
     />
+    </>
   )
 }
 

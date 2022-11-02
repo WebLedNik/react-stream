@@ -1,16 +1,14 @@
 import * as React from 'react'
 import {forwardRef, useEffect, useRef} from 'react'
-import {v4 as uuidv4} from 'uuid';
 import './style.css'
 import {FlowchartEditorState, useStore} from "../../store";
 import {select} from "d3-selection";
 import {drag} from "d3-drag";
 import {NodeState} from "./types";
 import {getRelativePosition, getTransformTranslateStyle} from "../../utils";
-import Handle from "../Handle";
-import {Part} from "../Line";
+import Handle, {HandleTypeNames} from "../Handle";
 import {Directions, Orientation} from "../../types";
-import {HandleTypeNames} from "../Handle/types";
+import {LineStateNames, PartStateNames} from "../Line";
 
 export interface NodeProps{
   node: NodeState
@@ -18,168 +16,135 @@ export interface NodeProps{
 type NodePropsRef = HTMLDivElement
 const Node = forwardRef<NodePropsRef, NodeProps>((props, ref) => {
   const {node} = props
-  const nodeRef = useRef(null)
+  const nodeRef = useRef<HTMLDivElement | null>(null)
   const {zoomTransformState, updateNodes, lines, updateLines}: FlowchartEditorState = useStore((state) => state)
 
-  const setPositionLines = (element: HTMLDivElement, elementPos: NodeState['position']) => {
-    const handles = element.querySelectorAll('.flowchart-editor_handle')
+  const setPositionNode = (nodePosition: NodeState['position']) => {
+    if (!nodeRef || !nodeRef.current) return;
+
+    const handles = nodeRef.current.querySelectorAll('.flowchart-editor_handle')
     if (!handles) return
 
     for (const handle of handles){
-      const handleRelativePos = getRelativePosition({parent: element, child: (handle as HTMLDivElement)})
+      const handleRelativePos = getRelativePosition({parent: nodeRef.current, child: (handle as HTMLDivElement)})
+
       const position = {
-        x: elementPos.x + (handle.clientWidth / 2) + (handleRelativePos.x / zoomTransformState.k),
-        y: elementPos.y + (handle.clientHeight / 2) + (handleRelativePos.y / zoomTransformState.k)
+        x: nodePosition.x + (handle.clientWidth / 2) + (handleRelativePos.x / zoomTransformState.k),
+        y: nodePosition.y + (handle.clientHeight / 2) + (handleRelativePos.y / zoomTransformState.k)
       }
-      const updatedSourceLines = lines.filter(line => line.source.handle.id === (handle as HTMLElement).dataset.id)?.map(line => {
-        const source = {...line.source, position}
 
-        if (line.parts.length > 1){
-          const firstPart: Part =  {
-            ...line.parts[0],
-            start: source.position,
-            end: (line.parts[0].orientation === Orientation.Horizontal) ? {x: line.parts[0].end.x, y: source.position.y} : {x: source.position.x, y: line.parts[0].end.y}
-          }
-          const secondPart: Part = {
-            ...line.parts[1],
-            start: firstPart.end
-          }
+      lines.filter(line => line.source.handle?.id === (handle as HTMLElement).dataset.id)?.map(line => {
 
-          const parts: Part[] = [firstPart, secondPart, ...line.parts.slice(2)]
-          return {...line, parts, source}
-        }
-
-        if (line.target.handle && line.target.position){
-          const lastPart = line.parts[0]
-          const firstNewPart: Part = {
-            id: uuidv4(),
-            orientation: lastPart.orientation,
-            start: lastPart.start,
-            end: (lastPart.orientation === Orientation.Horizontal) ? {
-              x: lastPart.start.x + ((line.source.handle.direction === Directions.Right) ? 50 : -50),
-              y: lastPart.start.y
-            } : {
-              x: lastPart.start.x,
-              y: lastPart.start.y + ((line.source.handle.direction === Directions.Top) ? -50 : 50)
-            }
-          }
-          const secondNewPart: Part = {
-            id: uuidv4(),
-            orientation: (firstNewPart.orientation === Orientation.Horizontal) ? Orientation.Vertical : Orientation.Horizontal,
-            start: firstNewPart.end,
-            end: (firstNewPart.orientation === Orientation.Horizontal) ? {
-              x: firstNewPart.end.x,
-              y: source.position.y
-            } : {
-              x: source.position.x,
-              y: firstNewPart.end.y
-            }
-          }
-          const parts: Part[] = [
-            firstNewPart,
-            secondNewPart,
-            {
-              ...lastPart,
-              start: (lastPart.orientation === Orientation.Horizontal) ? {
-                x: lastPart.end.x,
-                y: line.target.position.y
-              } : {
-                x: line.target.position.x,
-                y: lastPart.end.y
-              },
-              end: line.target.position
-            }
-          ]
-
-          return {...line, parts, source}
-        }
-
-        const parts: Part[] = [
-          {
-            ...line.parts[0],
-            start: source.position,
-            end: (line.parts[0].orientation === Orientation.Horizontal) ? {x: line.parts[0].end.x, y: source.position.y} : {x: source.position.x, y: line.parts[0].end.y}
-          },
-          ...line.parts.slice(1)
-        ]
-        return {...line, parts, source}
       })
-      const updatedTargetLines = lines.filter(line => line.target.handle?.id === (handle as HTMLElement).dataset.id)?.map(line => {
-        const target = {...line.target, position}
+      lines.filter(line => line.target.handle?.id === (handle as HTMLElement).dataset.id)?.map(line => {
+        const part = line.getEndPart()
+        if (!part) return
 
-        if (line.parts.length > 1) {
-          const lastPart = line.parts[line.parts.length - 1]
-          const nextLastPart = line.parts[line.parts.length - 2]
-
-          const parts: Part[] = [
-            ...line.parts.slice(0, -2),
-            {
-              ...nextLastPart,
-              end: (nextLastPart.orientation === Orientation.Horizontal) ? {
-                x: target.position.x,
-                y: nextLastPart.end.y
-              } : {x: nextLastPart.end.x, y: target.position.y}
-            },
-            {
-              ...lastPart,
-              start: (lastPart.orientation === Orientation.Horizontal) ? {
-                x: lastPart.start.x,
-                y: target.position.y
-              } : {x: target.position.x, y: lastPart.start.y},
-              end: target.position
-            }
-          ]
-
-          return {...line, parts, target}
-        }
-
-        const lastPart = line.parts[line.parts.length - 1]
-        const firstNewPart: Part = {
-          id: uuidv4(),
-          orientation: lastPart.orientation,
-          start: lastPart.start,
-          end: (lastPart.orientation === Orientation.Horizontal) ? {
-            x: lastPart.start.x + ((line.source.handle.direction === Directions.Right) ? 50 : -50),
-            y: lastPart.start.y
-          } : {
-            x: lastPart.start.x,
-            y: lastPart.start.y + ((line.source.handle.direction === Directions.Top) ? -50 : 50)
-          }
-        }
-        const secondNewPart: Part = {
-          id: uuidv4(),
-          orientation: (firstNewPart.orientation === Orientation.Horizontal) ? Orientation.Vertical : Orientation.Horizontal,
-          start: firstNewPart.end,
-          end: (firstNewPart.orientation === Orientation.Horizontal) ? {
-            x: firstNewPart.end.x,
-            y: target.position.y
-          } : {
-            x: target.position.x,
-            y: firstNewPart.end.y
-          }
-        }
-        const parts: Part[] = [
-          firstNewPart,
-          secondNewPart,
-          {
-            ...lastPart,
-            start: (lastPart.orientation === Orientation.Horizontal) ? {
-              x: lastPart.start.x,
-              y: target.position.y
-            } : {
-              x: target.position.x,
-              y: lastPart.start.y
-            },
-            end: target.position
-          }
-        ]
-
-        return {...line, parts, target}
+        line.setState(LineStateNames.UpdatedByNode)
+        line.setStatePart({part, state: PartStateNames.Updated})
+        line.setPart({position})
       })
-      // console.log({updatedTargetLines, lines, handle})
-      const payload = [...updatedSourceLines, ...updatedTargetLines]
+    }
+  }
+  const setPositionNodeByDelta = () => {
+    if (!nodeRef || !nodeRef.current) return;
 
-      updateLines(payload)
+    const handles = nodeRef.current.querySelectorAll('.flowchart-editor_handle')
+    if (!handles) return
+
+    for (const handle of handles){
+      const handleRelativePos = getRelativePosition({parent: nodeRef.current, child: (handle as HTMLDivElement)})
+
+      const position = {
+        x: node.position.x + (handle.clientWidth / 2) + (handleRelativePos.x / zoomTransformState.k),
+        y: node.position.y + (handle.clientHeight / 2) + (handleRelativePos.y / zoomTransformState.k)
+      }
+
+      lines.filter(line => line.source.handle?.id === (handle as HTMLElement).dataset.id)?.map(line => {
+        const part = line.getStartPart()
+        if (!part) return
+
+        if (part.orientation === Orientation.Horizontal){
+          const delta = part.start.y - position.y
+
+          if (delta === 0) return;
+          updateNodes([{...node, position: {...node.position, y: node.position.y + delta}}])
+        }
+
+        if (part.orientation === Orientation.Vertical){
+          const delta = part.start.x - position.x
+
+          if (delta === 0) return;
+          updateNodes([{...node, position: {...node.position, x: node.position.x + delta}}])
+        }
+      })
+      lines.filter(line => line.target.handle?.id === (handle as HTMLElement).dataset.id)?.map(line => {
+        const part = line.getEndPart()
+        if (!part) return
+
+        if (part.orientation === Orientation.Horizontal){
+          const delta = part.end.y - position.y
+
+          if (delta === 0) return;
+          updateNodes([{...node, position: {...node.position, y: node.position.y + delta}}])
+        }
+
+        if (part.orientation === Orientation.Vertical){
+          const delta = part.end.x - position.x
+
+          if (delta === 0) return;
+          updateNodes([{...node, position: {...node.position, x: node.position.x + delta}}])
+        }
+      })
+    }
+  }
+
+  const setPositionLines = (nodePosition: NodeState['position']) => {
+    if (!nodeRef || !nodeRef.current) return;
+
+    const handles = nodeRef.current.querySelectorAll('.flowchart-editor_handle')
+    if (!handles) return
+
+    for (const handle of handles){
+      const handleRelativePos = getRelativePosition({parent: nodeRef.current, child: (handle as HTMLDivElement)})
+
+      const position = {
+        x: nodePosition.x + (handle.clientWidth / 2) + (handleRelativePos.x / zoomTransformState.k),
+        y: nodePosition.y + (handle.clientHeight / 2) + (handleRelativePos.y / zoomTransformState.k)
+      }
+
+      const sourceLines = lines.filter(line => line.source.handle?.id === (handle as HTMLElement).dataset.id)
+      const targetLines = lines.filter(line => line.target.handle?.id === (handle as HTMLElement).dataset.id)
+
+      sourceLines?.map(line => {
+        line.setSourcePosition(position)
+      })
+      targetLines?.map(line => {
+        line.setTargetPosition(position)
+      })
+    }
+  }
+
+  const setTransformLines = () => {
+    if (!nodeRef || !nodeRef.current) return;
+
+    const handles = nodeRef.current.querySelectorAll('.flowchart-editor_handle')
+    if (!handles) return
+
+    for (const handle of handles){
+      const handleRelativePos = getRelativePosition({parent: nodeRef.current, child: (handle as HTMLDivElement)})
+
+      const position = {
+        x: node.position.x + (handle.clientWidth / 2) + (handleRelativePos.x / zoomTransformState.k),
+        y: node.position.y + (handle.clientHeight / 2) + (handleRelativePos.y / zoomTransformState.k)
+      }
+
+      lines.filter(line => line.source.handle?.id === (handle as HTMLElement).dataset.id)?.map(line => {
+        line.setTransform({position})
+      })
+      lines.filter(line => line.target.handle?.id === (handle as HTMLElement).dataset.id)?.map(line => {
+        line.setTransform({position})
+      })
     }
   }
 
@@ -190,34 +155,38 @@ const Node = forwardRef<NodePropsRef, NodeProps>((props, ref) => {
     let startYPos: number = 0
 
     const dragBehavior = drag()
-      .on('start', function (event, d){
-        if (!node.drag) return
+        .on('start', function (event, d){
+          if (!node.drag) return
 
-        startXPos = event.x
-        startYPos = event.y
-        selection.raise()
-      })
-      .on('drag', function (event, d){
-        if (!node.drag) return
+          startXPos = event.x
+          startYPos = event.y
+          selection.raise()
+        })
+        .on('drag', function (event, d){
+          if (!node.drag) return
 
-        const payload: NodeState['position'] = {
-          x: node.position.x - ((startXPos - event.x) / zoomTransformState.k),
-          y: node.position.y - ((startYPos - event.y) / zoomTransformState.k)
-        }
+          const nodePosition: NodeState['position'] = {
+            x: node.position.x - ((startXPos - event.x) / zoomTransformState.k),
+            y: node.position.y - ((startYPos - event.y) / zoomTransformState.k)
+          }
 
-        selection.attr('style', getTransformTranslateStyle(payload))
+          selection.attr('style', getTransformTranslateStyle(nodePosition))
 
-        setPositionLines(event.sourceEvent.target, payload)
-        updateNodes([{...node, position: payload}])
-      })
-      .on('end', function (event,d){
-        if (!node.drag) return
-      })
+          // setPositionNode(nodePosition)
+          updateNodes([{...node, position: nodePosition}])
+          setPositionLines(nodePosition)
+        })
+        .on('end', function (event,d){
+          if (!node.drag) return
+          setTransformLines()
+        })
 
     // @ts-ignore
     selection.call(dragBehavior)
   }, [zoomTransformState, node, lines])
-
+  useEffect(() => {
+    setPositionNodeByDelta()
+  }, [node, lines, zoomTransformState])
   useEffect(() => {
     const selection = select(nodeRef.current)
 
@@ -227,10 +196,10 @@ const Node = forwardRef<NodePropsRef, NodeProps>((props, ref) => {
  return(
    <div className={'flowchart-editor_node'} ref={nodeRef} data-id={node.id} data-x={node.position.x} data-y={node.position.y}>
      Node {node.id}
-     <Handle type={HandleTypeNames.Output} node={node} direction={Directions.Bottom}/>
-     <Handle type={HandleTypeNames.Output} node={node} direction={Directions.Right}/>
+     <Handle type={HandleTypeNames.Input} node={node} direction={Directions.Bottom}/>
      <Handle type={HandleTypeNames.Input} node={node} direction={Directions.Left}/>
-     <Handle type={HandleTypeNames.Input} node={node} direction={Directions.Top}/>
+     <Handle type={HandleTypeNames.Output} node={node} direction={Directions.Right}/>
+     <Handle type={HandleTypeNames.Output} node={node} direction={Directions.Top}/>
    </div>
  )
 })

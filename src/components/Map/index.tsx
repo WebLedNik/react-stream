@@ -38,7 +38,6 @@ const Map: React.FC<MapProps> = () => {
     const scaleX = minimapScaleX(zoomTransformState.k, width).invert(-zoomTransformState.k + width);
     const scaleY = minimapScaleY(zoomTransformState.k, height).invert(-zoomTransformState.k + height);
 
-    console.log({scaleX, scaleY})
     // const minXPos = Math.min(...nodes.map(n => n.position.x))
     // const maxXPos = Math.max(...nodes.map(n => n.position.x))
     // const minYPos = Math.min(...nodes.map(n => n.position.y))

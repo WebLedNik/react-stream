@@ -1,5 +1,5 @@
 import * as React from "react";
-import {PropsWithChildren} from "react";
+import {PropsWithChildren, useEffect} from "react";
 import { Provider, createStore } from "../../store";
 import './style.css'
 

@@ -1,12 +1,11 @@
 import * as React from 'react'
+import {useEffect} from 'react'
 import './style.css'
 import {FlowchartEditorState, useStore} from "../../store";
-import Line from "../Line";
+import Line, {LineStateNames} from "../Line";
 import Markers from "./Markers";
-import {useEffect} from "react";
 
-export interface LineRendererProps {
-}
+export interface LineRendererProps {}
 
 const LineRenderer: React.FC<LineRendererProps> = (props) => {
   const {} = props
@@ -19,7 +18,7 @@ const LineRenderer: React.FC<LineRendererProps> = (props) => {
     switch (event.key) {
       case 'Backspace':
       case 'Delete':
-        const payload = lines.filter(line => line.selected).map(line => line.id)
+        const payload = lines.filter(line => line.state === LineStateNames.Selected).map(line => line.id)
         return removeLines(payload)
     }
   }
@@ -46,3 +45,5 @@ const LineRenderer: React.FC<LineRendererProps> = (props) => {
 
 LineRenderer.displayName = 'LineRenderer'
 export default LineRenderer
+
+export * from './types'

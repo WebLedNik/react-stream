@@ -5,7 +5,11 @@ import {NodeDTO} from "../Node";
 
 export interface ControlsProps{}
 const Controls: React.FC<ControlsProps> = () => {
-  const {setNodes, reset}:FlowchartEditorState = useStore((state) => state)
+  const {setNodes, reset, lines, nodes}:FlowchartEditorState = useStore((state) => state)
+
+  const handleLogs = () => {
+    console.log('logs', {lines, nodes})
+  }
 
   const handleAddNode = () => {
     const payload:NodeDTO = {
@@ -22,6 +26,7 @@ const Controls: React.FC<ControlsProps> = () => {
     <div className={'flowchart-editor_controls'}>
       <button onClick={handleAddNode}>Add node</button>
       <button onClick={handleReset}>Reset</button>
+      <button onClick={handleLogs}>Logs</button>
     </div>
   )
 }
