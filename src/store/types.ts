@@ -1,6 +1,6 @@
 import {ZoomTransform} from "d3-zoom";
 import {NodeDTO, NodeState} from "../components/Node";
-import {LineDTO, LineState} from "../components/Line";
+import {LineDTO, LineState, LineValues} from "../components/Line";
 
 export interface FlowchartEditorValues{
   width: number

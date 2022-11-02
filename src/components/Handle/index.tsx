@@ -5,9 +5,9 @@ import './style.css'
 import {v4 as uuidv4} from 'uuid';
 import {select} from "d3-selection";
 import {FlowchartEditorState, useStore} from "../../store";
-import {LineDTO, LineState} from "../Line";
+import {Line, LineStateNames} from "../Line";
 import {NodeState} from "../Node";
-import {getRelativePosition} from "../../utils";
+import {getRelativePosition, getRootElement} from "../../utils";
 import {Directions} from "../../types";
 import {HandleTypeNames} from "./types";
 
@@ -19,63 +19,55 @@ interface HandleProps {
 
 const Handle: React.FC<HandleProps> = (props) => {
   const {node, direction, type} = props
-  const handleRef = useRef(null)
+  const handleRef = useRef<HTMLDivElement>(null)
   const {zoomTransformState, lines, setLines, updateLines}: FlowchartEditorState = useStore((state) => state)
   const handleId = useMemo(() => uuidv4(), [])
+
+  const handleMouseDown = (event: MouseEvent) => {
+    event.stopPropagation()
+    event.preventDefault()
+
+    if (!event.target) return;
+    if (type !== HandleTypeNames.Output) return;
+
+    const eventTarget = (event.target as HTMLDivElement).dataset.id ? (event.target as HTMLDivElement) : ((event.target as HTMLDivElement).closest(`[data-id='${handleId}']`) as HTMLDivElement)
+    const parent = window.document.querySelector(`[data-id='${node.id}']`);
+    if (!parent || !eventTarget) return
+
+    const handleRelativePos = getRelativePosition({parent: parent as HTMLDivElement, child: eventTarget})
+
+    const x = node.position.x + (eventTarget.clientWidth / 2) + (handleRelativePos.x / zoomTransformState.k)
+    const y = node.position.y + (eventTarget.clientHeight / 2) + (handleRelativePos.y / zoomTransformState.k)
+
+    setLines([Line.getDTO({handle: {id: handleId, type, direction}, position: {x,y}})])
+  }
+  const handleMouseUp = (event: MouseEvent) => {
+    event.preventDefault()
+
+    if (!event.target) return;
+    if (type === HandleTypeNames.Output) return;
+
+    const eventTarget = (event.target as HTMLDivElement).dataset.id ? (event.target as HTMLDivElement) : ((event.target as HTMLDivElement).closest(`[data-id='${handleId}']`) as HTMLDivElement)
+    const parent = window.document.querySelector(`[data-id='${node.id}']`);
+    if (!parent || !eventTarget) return
+
+    const handleRelativePos = getRelativePosition({parent: parent as HTMLDivElement, child: eventTarget})
+
+    const x = node.position.x + (eventTarget.clientWidth / 2) + (handleRelativePos.x / zoomTransformState.k)
+    const y = node.position.y + (eventTarget.clientHeight / 2) + (handleRelativePos.y / zoomTransformState.k)
+
+    const line = lines.find(l => l.state === LineStateNames.Created)
+    if (!line) return;
+
+    line.setTarget({handle: {id: handleId, type, direction}, position: {x,y}})
+    updateLines([line])
+  }
 
   useEffect(() => {
     const selection = select(handleRef.current)
 
-    selection.on('mousedown', (event) => {
-      event.stopPropagation();
-      event.preventDefault()
-
-      if (type !== HandleTypeNames.Output) return;
-
-      const parent = window.document.querySelectorAll(`[data-id='${node.id}']`)[0];
-      if (!parent) return
-
-      const handleRelativePos = getRelativePosition({parent: parent as HTMLDivElement, child: event.target})
-
-      const x = node.position.x + (event.target.clientWidth / 2) + (handleRelativePos.x / zoomTransformState.k)
-      const y = node.position.y + (event.target.clientHeight / 2) + (handleRelativePos.y / zoomTransformState.k)
-
-      const payload: LineDTO = {
-        source: {handle: {id: handleId, type, direction}, position: {x, y}},
-        target: {position: {x, y}},
-        creating: true
-      }
-
-      setLines([payload])
-    })
-
-    selection.on('mouseover', (event) => {
-      event.stopPropagation();
-      event.preventDefault()
-
-      if (type !== HandleTypeNames.Input) return;
-
-      const parent = window.document.querySelectorAll(`[data-id='${node.id}']`)[0];
-      if (!parent) return
-
-      const handleRelativePos = getRelativePosition({parent: parent as HTMLDivElement, child: event.target})
-
-      const x = node.position.x + (event.target.clientWidth / 2) + (handleRelativePos.x / zoomTransformState.k)
-      const y = node.position.y + (event.target.clientHeight / 2) + (handleRelativePos.y / zoomTransformState.k)
-
-      const creatingLine = lines.find(l => l.creating)
-
-      if (creatingLine) {
-        const payload: LineState = {
-          ...creatingLine,
-          target: {...creatingLine.target, handle: {id: handleId, type, direction}, position: {x, y}}
-        }
-
-        updateLines([payload])
-      }
-
-      console.log('Handle mouseup', {x, y, creatingLine, handleId})
-    })
+    selection.on('mousedown', handleMouseDown)
+    selection.on('mouseup', handleMouseUp)
   }, [node, lines, zoomTransformState])
 
   return (
@@ -96,9 +88,12 @@ const Handle: React.FC<HandleProps> = (props) => {
     data-parent={node.id}
     data-handle-type={type}
     data-direction={direction}
-  />
+  >
+    </div>
   )
 }
 
 Handle.displayName = 'Handle'
 export default Handle
+export * from './types'
+export * from './utils'

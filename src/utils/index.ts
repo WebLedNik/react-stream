@@ -5,7 +5,7 @@ export function getTransformTranslateScaleStyle(position: Position & {k: number}
 }
 
 export function getTransformTranslateStyle(position: Position){
-  return `transform: translate(${position.x}px, ${position.y}px)`
+  return `translate(${position.x}px, ${position.y}px)`
 }
 
 interface GetRelativePositionProps{parent: HTMLDivElement, child: HTMLDivElement}
@@ -62,7 +62,7 @@ export function getDirectionCursor(props: GetDirectionCursorProps){
   return Directions.Right;
 }
 
-export function getOrientation(direction: Directions): Orientation{
+export function getOrientationFromDirection(direction: Directions): Orientation{
   switch (direction){
     case Directions.Right:
       return Orientation.Horizontal
@@ -73,4 +73,8 @@ export function getOrientation(direction: Directions): Orientation{
     case Directions.Bottom:
       return Orientation.Vertical
   }
+}
+
+export function getRootElement(): HTMLDivElement {
+  return window.document.getElementsByClassName('flowchart-editor')[0] as HTMLDivElement
 }

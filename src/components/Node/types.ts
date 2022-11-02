@@ -1,5 +1,10 @@
 import {Position} from "../../types";
 
+export enum NodeStateNames {
+  Fixed = 'fixed',
+  Selected = 'selected'
+}
+
 export interface NodeDTO{
   width?: number
   height?: number
@@ -8,6 +13,7 @@ export interface NodeDTO{
 
 export interface NodeValues{
   id: string
+  state: NodeStateNames
   width: number
   height: number
   position: Position
