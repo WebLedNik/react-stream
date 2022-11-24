@@ -25,5 +25,5 @@ const Viewport: React.FC<ViewportProps> = ({children, ...props}) => {
   )
 }
 
-Viewport.displayName = 'Viewport'
+Viewport.displayName = 'FlowchartViewport'
 export default Viewport

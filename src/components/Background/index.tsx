@@ -13,5 +13,5 @@ const Background: React.FC<BackgroundProps> = () => {
  )
 }
 
-Background.displayName = 'Background'
+Background.displayName = 'FlowchartBackground'
 export default Background

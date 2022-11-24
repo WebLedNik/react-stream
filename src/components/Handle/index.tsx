@@ -93,7 +93,7 @@ const Handle: React.FC<HandleProps> = (props) => {
   )
 }
 
-Handle.displayName = 'Handle'
+Handle.displayName = 'FlowchartHandle'
 export default Handle
 export * from './types'
 export * from './utils'

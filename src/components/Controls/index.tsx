@@ -31,5 +31,5 @@ const Controls: React.FC<ControlsProps> = () => {
   )
 }
 
-Controls.displayName = 'Controls'
+Controls.displayName = 'FlowchartControls'
 export default Controls

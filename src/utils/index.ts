@@ -1,4 +1,5 @@
 import {Directions, Orientation, Position} from "../types";
+import {isEmpty, isEqual, xorWith} from 'lodash'
 
 export function getTransformTranslateScaleStyle(position: Position & {k: number}){
   return `transform: translate(${position.x}px, ${position.y}px) scale(${position.k})`
@@ -77,4 +78,8 @@ export function getOrientationFromDirection(direction: Directions): Orientation{
 
 export function getRootElement(): HTMLDivElement {
   return window.document.getElementsByClassName('flowchart-editor')[0] as HTMLDivElement
+}
+
+export function isEqualArray(prev: any[], next: any[]): boolean{
+  return isEmpty(xorWith(prev, next, isEqual))
 }

@@ -64,6 +64,6 @@ const ZoomPane: React.FC<ZoomPaneProps> = ({children}) => {
   )
 }
 
-ZoomPane.displayName = 'ZoomPane'
+ZoomPane.displayName = 'FlowchartZoomPane'
 export default ZoomPane
 

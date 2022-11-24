@@ -63,6 +63,6 @@ const Map: React.FC<MapProps> = () => {
   )
 }
 
-Map.displayName = 'Map'
+Map.displayName = 'FlowchartMap'
 export default Map
 export * from './types'

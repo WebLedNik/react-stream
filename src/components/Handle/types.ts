@@ -1,5 +1,4 @@
 import {Directions, Position} from "../../types";
-import {Part} from "../Line";
 
 export enum HandleTypeNames {
   Input = 'input',

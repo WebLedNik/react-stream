@@ -1,35 +1,17 @@
 import * as React from 'react'
-import {useEffect} from 'react'
 import './style.css'
-import {FlowchartEditorState, useStore} from "../../store";
-import Line, {LineStateNames} from "../Line";
 import Markers from "./Markers";
+import {isEqualArray} from "../../utils";
+import {LineComponent, LineState} from "../Line";
 
-export interface LineRendererProps {}
+export interface LineRendererProps {
+  lines: LineState[]
+}
 
 const LineRenderer: React.FC<LineRendererProps> = (props) => {
-  const {} = props
-  const {lines, removeLines}: FlowchartEditorState = useStore((state) => state)
+  const {lines} = props
 
-  const handleKeyUp = (event: KeyboardEvent) => {
-    event.stopPropagation()
-    event.preventDefault()
-
-    switch (event.key) {
-      case 'Backspace':
-      case 'Delete':
-        const payload = lines.filter(line => line.state === LineStateNames.Selected).map(line => line.id)
-        return removeLines(payload)
-    }
-  }
-
-  useEffect(() => {
-    window.document.addEventListener('keyup', handleKeyUp)
-
-    return () => {
-      window.document.removeEventListener('keyup', handleKeyUp)
-    }
-  }, [lines])
+  console.log('LineRenderer')
 
   return (
     <svg className={'flowchart-editor_lines'}>
@@ -37,13 +19,14 @@ const LineRenderer: React.FC<LineRendererProps> = (props) => {
         <Markers/>
       </defs>
       <g>
-        {lines.map(line => <Line key={line.id} line={line}/>)}
+        {lines.map(line => <LineComponent key={line.id} line={line}/>)}
       </g>
     </svg>
   )
 }
 
-LineRenderer.displayName = 'LineRenderer'
-export default LineRenderer
+LineRenderer.displayName = 'FlowchartLineRenderer'
+const areEqual = (prevProps: LineRendererProps, nextProps: LineRendererProps) => isEqualArray(prevProps.lines, nextProps.lines)
+export default React.memo(LineRenderer, areEqual)
 
 export * from './types'

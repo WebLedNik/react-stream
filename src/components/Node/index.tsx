@@ -9,6 +9,8 @@ import {getRelativePosition, getTransformTranslateStyle} from "../../utils";
 import Handle, {HandleTypeNames} from "../Handle";
 import {Directions, Orientation} from "../../types";
 import {LineStateNames, PartStateNames} from "../Line";
+import {LineRendererProps} from "../LineRenderer";
+import {isEqual} from "lodash";
 
 export interface NodeProps {
   node: NodeState
@@ -24,7 +26,7 @@ const Node = forwardRef<NodePropsRef, NodeProps>((props, ref) => {
     event.preventDefault()
     event.stopPropagation()
 
-    updateNodes([{...node, state: node.state === NodeStateNames.Selected ? NodeStateNames.Fixed : NodeStateNames.Selected}])
+    //updateNodes([{...node, state: node.state === NodeStateNames.Selected ? NodeStateNames.Fixed : NodeStateNames.Selected}])
   }
 
   const setPositionNode = (nodePosition: NodeState['position']) => {
@@ -199,6 +201,8 @@ const Node = forwardRef<NodePropsRef, NodeProps>((props, ref) => {
     selection.style('transform', getTransformTranslateStyle(node.position))
   }, [node])
 
+  console.log('Node', {props})
+
   return (
     <div
       className={'flowchart-editor_node'}
@@ -221,7 +225,8 @@ const Node = forwardRef<NodePropsRef, NodeProps>((props, ref) => {
   )
 })
 
-Node.displayName = 'Node'
-export default Node
+Node.displayName = 'FlowchartNode'
+const areEqual = (prevProps: NodeProps, nextProps: NodeProps) => isEqual(prevProps.node, nextProps.node)
+export default React.memo(Node, areEqual)
 export * from './utils'
 export * from './types'
