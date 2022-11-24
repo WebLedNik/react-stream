@@ -5,7 +5,15 @@ import './style.css'
 import {v4 as uuidv4} from 'uuid';
 import {select} from "d3-selection";
 import {FlowchartEditorState, useStore} from "../../store";
-import {Line, LineStateNames} from "../Line";
+import {
+  Line,
+  LineStateNames,
+  getLineDTO,
+  setLineTarget,
+  getIsLineModified,
+  setLineTransform,
+  setLinePart, LineState
+} from "../Line";
 import {NodeState} from "../Node";
 import {getRelativePosition, getRootElement} from "../../utils";
 import {Directions} from "../../types";
@@ -20,7 +28,7 @@ interface HandleProps {
 const Handle: React.FC<HandleProps> = (props) => {
   const {node, direction, type} = props
   const handleRef = useRef<HTMLDivElement>(null)
-  const {zoomTransformState, lines, setLines, updateLines}: FlowchartEditorState = useStore((state) => state)
+  const {zoomTransformState, lines, setLines, updateLines, updateNodes}: FlowchartEditorState = useStore((state) => state)
   const handleId = useMemo(() => uuidv4(), [])
 
   const handleMouseDown = (event: MouseEvent) => {
@@ -29,6 +37,7 @@ const Handle: React.FC<HandleProps> = (props) => {
 
     if (!event.target) return;
     if (type !== HandleTypeNames.Output) return;
+    if (lines.find(l => l.source.handle?.id === handleId)) return;
 
     const eventTarget = (event.target as HTMLDivElement).dataset.id ? (event.target as HTMLDivElement) : ((event.target as HTMLDivElement).closest(`[data-id='${handleId}']`) as HTMLDivElement)
     const parent = window.document.querySelector(`[data-id='${node.id}']`);
@@ -39,13 +48,19 @@ const Handle: React.FC<HandleProps> = (props) => {
     const x = node.position.x + (eventTarget.clientWidth / 2) + (handleRelativePos.x / zoomTransformState.k)
     const y = node.position.y + (eventTarget.clientHeight / 2) + (handleRelativePos.y / zoomTransformState.k)
 
-    setLines([Line.getDTO({handle: {id: handleId, type, direction}, position: {x,y}})])
+    const payloadHandle = {id: handleId, type, direction}
+    const payloadLine = getLineDTO({handle: payloadHandle, position: {x,y}})
+
+    setLines([payloadLine], (lines) => {
+      updateNodes([{...node, lines: [...node.lines, ...lines]}])
+    })
   }
   const handleMouseUp = (event: MouseEvent) => {
     event.preventDefault()
 
     if (!event.target) return;
     if (type === HandleTypeNames.Output) return;
+    if (lines.find(l => l.target.handle?.id === handleId)) return;
 
     const eventTarget = (event.target as HTMLDivElement).dataset.id ? (event.target as HTMLDivElement) : ((event.target as HTMLDivElement).closest(`[data-id='${handleId}']`) as HTMLDivElement)
     const parent = window.document.querySelector(`[data-id='${node.id}']`);
@@ -59,8 +74,12 @@ const Handle: React.FC<HandleProps> = (props) => {
     const line = lines.find(l => l.state === LineStateNames.Created)
     if (!line) return;
 
-    line.setTarget({handle: {id: handleId, type, direction}, position: {x,y}})
-    updateLines([line])
+    const payloadHandle = {id: handleId, type, direction}
+    const payloadLine = setLineTarget({currentLine: line, handle: payloadHandle, position: {x,y}})
+    if (!payloadLine) return;
+
+    updateLines([payloadLine])
+    updateNodes([{...node, lines: [...node.lines, payloadLine]}])
   }
 
   useEffect(() => {

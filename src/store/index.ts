@@ -40,9 +40,10 @@ const createStore = () => create<FlowchartEditorState>((setState, getState) => (
 
     setState({nodes: payload})
   },
-  setLines: (lines: LineDTO[]) => {
+  setLines: (lines: LineDTO[], cb?:(lines: LineState[]) => void) => {
     const payload = lines.map(line => new Line(line))
     setState({lines: [...payload, ...getState().lines]})
+    return cb && cb(payload)
   },
   updateLines: (lines: LineState[]) => {
     const payload = getState().lines.map(line => {

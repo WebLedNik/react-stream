@@ -2,15 +2,14 @@ import * as React from 'react'
 import './style.css'
 import Node, {NodeState} from "../Node";
 import {FlowchartEditorState, useStore} from "../../store";
-import {isEqualArray} from "../../utils";
-import {LineRendererProps} from "../LineRenderer";
+import shallow from "zustand/shallow";
 
 export interface NodeRendererProps{
-  nodes: NodeState[]
+
 }
 const NodeRenderer: React.FC<NodeRendererProps> = (props) => {
-  const {nodes} = props
-  const {}:FlowchartEditorState = useStore((state) => state)
+  const {} = props
+  const nodes = useStore((state: FlowchartEditorState) => state.nodes, shallow)
   console.log('NodeRenderer')
   return(
     <div className={'flowchart-editor_nodes'}>
@@ -20,5 +19,4 @@ const NodeRenderer: React.FC<NodeRendererProps> = (props) => {
 }
 
 NodeRenderer.displayName = 'FlowchartNodeRenderer'
-const areEqual = (prevProps: NodeRendererProps, nextProps: NodeRendererProps) => isEqualArray(prevProps.nodes, nextProps.nodes)
-export default React.memo(NodeRenderer, areEqual)
+export default React.memo(NodeRenderer)

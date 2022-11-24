@@ -1,4 +1,6 @@
 import {Position} from "../../types";
+import {LineState} from "../Line";
+import {HandleState} from "../Handle";
 
 export enum NodeStateNames {
   Fixed = 'fixed',
@@ -9,6 +11,7 @@ export interface NodeDTO{
   width?: number
   height?: number
   position?: Position
+  lines?: Array<LineState>
 }
 
 export interface NodeValues{
@@ -18,6 +21,7 @@ export interface NodeValues{
   height: number
   position: Position
   drag: boolean
+  lines: Array<LineState>
 }
 
 export interface NodeActions{

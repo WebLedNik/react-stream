@@ -9,13 +9,11 @@ export interface GraphViewProps {
 }
 
 const GraphView: React.FC<GraphViewProps> = (props) => {
-  const {lines, nodes}: FlowchartEditorState = useStore((state) => state)
-
   return (
     <ZoomPane>
       <Viewport>
-        <NodeRenderer nodes={nodes}/>
-        <LineRenderer lines={lines}/>
+        <NodeRenderer />
+        <LineRenderer />
       </Viewport>
     </ZoomPane>
   )

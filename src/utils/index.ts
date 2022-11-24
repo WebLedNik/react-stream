@@ -83,3 +83,7 @@ export function getRootElement(): HTMLDivElement {
 export function isEqualArray(prev: any[], next: any[]): boolean{
   return isEmpty(xorWith(prev, next, isEqual))
 }
+
+export function getInvertedOrientation(orientation: Orientation): Orientation {
+  return (orientation === Orientation.Horizontal) ? Orientation.Vertical : Orientation.Horizontal
+}

@@ -7,18 +7,18 @@ export interface ControlsProps{}
 const Controls: React.FC<ControlsProps> = () => {
   const {setNodes, reset, lines, nodes}:FlowchartEditorState = useStore((state) => state)
 
-  const handleLogs = () => {
+  const handleLogs = (event: React.MouseEvent) => {
     console.log('logs', {lines, nodes})
   }
 
-  const handleAddNode = () => {
+  const handleAddNode = (event: React.MouseEvent) => {
     const payload:NodeDTO = {
 
     }
     setNodes([payload])
   }
 
-  const handleReset = () => {
+  const handleReset = (event: React.MouseEvent) => {
     reset()
   }
 

@@ -32,6 +32,7 @@ export interface LineValues {
   target: { handle?: HandleState, line?: LineState, position?: Position }
   parts: Part[]
   state: LineStateNames
+  drawnParts: number
 }
 
 export interface GetLineDTOProps {
@@ -39,52 +40,58 @@ export interface GetLineDTOProps {
   handle: HandleState
 }
 
-export interface SetSourceProps {
+export interface SetLineSourceProps {
+  currentLine: LineState
   line?: LineState
   handle?: HandleState
 }
 
-export interface SetTargetProps {
+export interface SetLineTargetPositionProps{
+  currentLine: LineState
+  position: Position
+}
+
+export interface SetLineSourcePositionProps{
+  currentLine: LineState
+  position: Position
+}
+
+export interface SetLineTargetProps {
+  currentLine: LineState
   line?: LineState
   handle?: HandleState
   position?: Position
 }
 
-export interface SetTransformProps {
+export interface SetLineTransformProps {
+  line: LineState
   position: Position
 }
 
-export interface SetPartProps{
+export interface SetLineStateProps{
+  line: LineState,
+  state: LineStateNames
+}
+
+export interface SetLinePartProps{
+  currentLine: LineState
   position: Position
 }
 
-export interface SetStatePartProps{
+export interface SetLineStatePartProps{
+  parts: Part[]
   part: Part
   state: PartStateNames
 }
 
-export interface LineActions {
-  getMarkerType(): MarkerTypeNames
-  getIsModified(): boolean
-  getTargetPosition(): Position
-  getStartPart(): Part | undefined
-  getEndPart(): Part | undefined
-  setState(state: LineStateNames): void
-  setStatePart(props: SetStatePartProps): void
-  setSource(props: SetSourceProps): void
-  setTarget(props: SetTargetProps): void
-  setTransform(props: SetTransformProps): void
-  setPart(props: SetPartProps): void
-  setTargetPosition(position: Position): void
-  setSourcePosition(position: Position): void
-}
+export interface LineActions {}
 
 export interface LineDTO {
   source: { handle?: HandleState, line?: LineState, position: Position }
   target: { handle?: HandleState, line?: LineState, position: Position }
   parts?: Part[]
   state?: LineStateNames
-  selected?: boolean
+  drawnParts?: number
 }
 
 export type LineState = LineValues & LineActions

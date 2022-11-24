@@ -14,6 +14,7 @@ export class Node implements NodeValues{
   width: number;
   position: NodeState['position']
   drag: boolean
+  lines: NodeState['lines']
 
   constructor(payload: NodeDTO) {
     this.id = uuidv4()
@@ -22,6 +23,7 @@ export class Node implements NodeValues{
     this.height = payload.height ?? DEFAULT_HEIGHT
     this.position = payload.position ?? {x: DEFAULT_POSITION_X, y: DEFAULT_POSITION_Y}
     this.drag = true
+    this.lines = payload.lines ?? []
   }
 }
 

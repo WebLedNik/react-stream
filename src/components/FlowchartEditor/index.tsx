@@ -18,7 +18,7 @@ const FlowchartEditor = forwardRef<FlowchartEditorRefProps, FlowchartEditorProps
           <GraphView/>
           <Background/>
           <Controls/>
-          <SelectionArea/>
+          {/*<SelectionArea/>*/}
           {/*<Map/>*/}
       </Wrapper>
     </div>

@@ -9,9 +9,9 @@ const SelectionArea: React.FC<SelectionAreaProps> = (props) => {
   return(
     <Selecto
       // The container to add a selection element
-      container={document.querySelector(".flowchart-editor_zoom-pane") as HTMLElement}
+      container={document.querySelector(".flowchart-editor") as HTMLElement}
       // The area to drag selection element (default: container)
-      dragContainer={document.querySelector(".flowchart-editor_zoom-pane") as HTMLElement}
+      dragContainer={document.querySelector(".flowchart-editor") as HTMLElement}
       // Targets to select. You can register a queryselector or an Element.
       selectableTargets={[
         ".flowchart-editor_node",

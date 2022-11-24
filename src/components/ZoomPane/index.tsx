@@ -6,14 +6,14 @@ import {zoom} from "d3-zoom";
 import {FlowchartEditorState, useStore} from "../../store";
 import {getRootElement} from "../../utils";
 import {NodeStateNames} from "../Node";
-import {LineStateNames} from "../Line";
+import {LineStateNames, setLineState} from "../Line";
 
 export interface ZoomPaneProps extends PropsWithChildren {
 }
 
 const ZoomPane: React.FC<ZoomPaneProps> = ({children}) => {
   const refZoomPane = useRef(null)
-  const {zoomTransformState, setZoomTransformState, nodes, lines, updateNodes}: FlowchartEditorState = useStore((state) => state)
+  const {zoomTransformState, setZoomTransformState, nodes, lines, updateNodes, updateLines}: FlowchartEditorState = useStore((state) => state)
 
   useEffect(() => {
     const selection = select(refZoomPane.current)
@@ -24,7 +24,7 @@ const ZoomPane: React.FC<ZoomPaneProps> = ({children}) => {
       // Сброс выделенных объектов
       if (event.button === LEFT_MOUSE_BTN){
         updateNodes(nodes.map(n => ({...n, state: NodeStateNames.Fixed})))
-        lines.forEach(l => l.setState(LineStateNames.Fixed))
+        updateLines(lines.map(l => setLineState({line: l, state: LineStateNames.Fixed})))
       }
     })
 

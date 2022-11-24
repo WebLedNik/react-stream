@@ -4,13 +4,12 @@ import './style.css'
 import {FlowchartEditorState, useStore} from "../../store";
 import {select} from "d3-selection";
 import {drag} from "d3-drag";
-import {NodeState, NodeStateNames} from "./types";
+import {NodeState} from "./types";
 import {getRelativePosition, getTransformTranslateStyle} from "../../utils";
 import Handle, {HandleTypeNames} from "../Handle";
 import {Directions, Orientation} from "../../types";
-import {LineStateNames, PartStateNames} from "../Line";
-import {LineRendererProps} from "../LineRenderer";
-import {isEqual} from "lodash";
+import {getEndPart, getStartPart, setLineSourcePosition, setLineTargetPosition, setLineTransform} from "../Line";
+import shallow from "zustand/shallow";
 
 export interface NodeProps {
   node: NodeState
@@ -20,7 +19,15 @@ type NodePropsRef = HTMLDivElement
 const Node = forwardRef<NodePropsRef, NodeProps>((props, ref) => {
   const {node} = props
   const nodeRef = useRef<HTMLDivElement | null>(null)
-  const {zoomTransformState, updateNodes, lines, updateLines}: FlowchartEditorState = useStore((state) => state)
+  const {
+    zoomTransformState,
+    updateNodes,
+    updateLines
+  } = useStore((state: FlowchartEditorState) => ({
+    zoomTransformState: state.zoomTransformState,
+    updateNodes: state.updateNodes,
+    updateLines: state.updateLines
+  }), shallow)
 
   const handleClick = (event: React.MouseEvent) => {
     event.preventDefault()
@@ -29,85 +36,85 @@ const Node = forwardRef<NodePropsRef, NodeProps>((props, ref) => {
     //updateNodes([{...node, state: node.state === NodeStateNames.Selected ? NodeStateNames.Fixed : NodeStateNames.Selected}])
   }
 
-  const setPositionNode = (nodePosition: NodeState['position']) => {
-    if (!nodeRef || !nodeRef.current) return;
-
-    const handles = nodeRef.current!.querySelectorAll('.flowchart-editor_handle')
-    if (!handles) return
-
-    for (const handle of handles) {
-      const handleRelativePos = getRelativePosition({parent: nodeRef.current!, child: (handle as HTMLDivElement)})
-
-      const position = {
-        x: nodePosition.x + (handle.clientWidth / 2) + (handleRelativePos.x / zoomTransformState.k),
-        y: nodePosition.y + (handle.clientHeight / 2) + (handleRelativePos.y / zoomTransformState.k)
-      }
-
-      lines.filter(line => line.source.handle?.id === (handle as HTMLElement).dataset.id)?.map(line => {
-
-      })
-      lines.filter(line => line.target.handle?.id === (handle as HTMLElement).dataset.id)?.map(line => {
-        const part = line.getEndPart()
-        if (!part) return
-
-        line.setState(LineStateNames.UpdatedByNode)
-        line.setStatePart({part, state: PartStateNames.Updated})
-        line.setPart({position})
-      })
-    }
-  }
-  const setPositionNodeByDelta = () => {
-    if (!nodeRef || !nodeRef.current) return;
-
-    const handles = nodeRef.current!.querySelectorAll('.flowchart-editor_handle')
-    if (!handles) return
-
-    for (const handle of handles) {
-      const handleRelativePos = getRelativePosition({parent: nodeRef.current!, child: (handle as HTMLDivElement)})
-
-      const position = {
-        x: node.position.x + (handle.clientWidth / 2) + (handleRelativePos.x / zoomTransformState.k),
-        y: node.position.y + (handle.clientHeight / 2) + (handleRelativePos.y / zoomTransformState.k)
-      }
-
-      lines.filter(line => line.source.handle?.id === (handle as HTMLElement).dataset.id)?.map(line => {
-        const part = line.getStartPart()
-        if (!part) return
-
-        if (part.orientation === Orientation.Horizontal) {
-          const delta = part.start.y - position.y
-
-          if (delta === 0) return;
-          updateNodes([{...node, position: {...node.position, y: node.position.y + delta}}])
-        }
-
-        if (part.orientation === Orientation.Vertical) {
-          const delta = part.start.x - position.x
-
-          if (delta === 0) return;
-          updateNodes([{...node, position: {...node.position, x: node.position.x + delta}}])
-        }
-      })
-      lines.filter(line => line.target.handle?.id === (handle as HTMLElement).dataset.id)?.map(line => {
-        const part = line.getEndPart()
-        if (!part) return
-
-        if (part.orientation === Orientation.Horizontal) {
-          const delta = part.end.y - position.y
-
-          if (delta === 0) return;
-          updateNodes([{...node, position: {...node.position, y: node.position.y + delta}}])
-        }
-
-        if (part.orientation === Orientation.Vertical) {
-          const delta = part.end.x - position.x
-
-          if (delta === 0) return;
-          updateNodes([{...node, position: {...node.position, x: node.position.x + delta}}])
-        }
-      })
-    }
-  }
+  // const setPositionNode = (nodePosition: NodeState['position']) => {
+  //   if (!nodeRef || !nodeRef.current) return;
+  //
+  //   const handles = nodeRef.current!.querySelectorAll('.flowchart-editor_handle')
+  //   if (!handles) return
+  //
+  //   for (const handle of handles) {
+  //     const handleRelativePos = getRelativePosition({parent: nodeRef.current!, child: (handle as HTMLDivElement)})
+  //
+  //     const position = {
+  //       x: nodePosition.x + (handle.clientWidth / 2) + (handleRelativePos.x / zoomTransformState.k),
+  //       y: nodePosition.y + (handle.clientHeight / 2) + (handleRelativePos.y / zoomTransformState.k)
+  //     }
+  //
+  //     lines.filter(line => line.source.handle?.id === (handle as HTMLElement).dataset.id)?.map(line => {
+  //
+  //     })
+  //     lines.filter(line => line.target.handle?.id === (handle as HTMLElement).dataset.id)?.map(line => {
+  //       const part = getEndPart(line.parts)
+  //       if (!part) return
+  //
+  //       line.setState(LineStateNames.UpdatedByNode)
+  //       line.setStatePart({part, state: PartStateNames.Updated})
+  //       line.setPart({position})
+  //     })
+  //   }
+  // }
+  // const setPositionNodeByDelta = () => {
+  //   if (!nodeRef || !nodeRef.current) return;
+  //
+  //   const handles = nodeRef.current!.querySelectorAll('.flowchart-editor_handle')
+  //   if (!handles) return
+  //
+  //   for (const handle of handles) {
+  //     const handleRelativePos = getRelativePosition({parent: nodeRef.current!, child: (handle as HTMLDivElement)})
+  //
+  //     const position = {
+  //       x: node.position.x + (handle.clientWidth / 2) + (handleRelativePos.x / zoomTransformState.k),
+  //       y: node.position.y + (handle.clientHeight / 2) + (handleRelativePos.y / zoomTransformState.k)
+  //     }
+  //
+  //     node.lines.map(({line}) => line).filter(line => line.source.handle?.id === (handle as HTMLElement).dataset.id)?.map(line => {
+  //       const part = getStartPart(line.parts)
+  //       if (!part) return
+  //
+  //       if (part.orientation === Orientation.Horizontal) {
+  //         const delta = part.start.y - position.y
+  //
+  //         if (delta === 0) return;
+  //         updateNodes([{...node, position: {...node.position, y: node.position.y + delta}}])
+  //       }
+  //
+  //       if (part.orientation === Orientation.Vertical) {
+  //         const delta = part.start.x - position.x
+  //
+  //         if (delta === 0) return;
+  //         updateNodes([{...node, position: {...node.position, x: node.position.x + delta}}])
+  //       }
+  //     })
+  //     node.lines.map(({line}) => line).filter(line => line.target.handle?.id === (handle as HTMLElement).dataset.id)?.map(line => {
+  //       const part = getEndPart(line.parts)
+  //       if (!part) return
+  //
+  //       if (part.orientation === Orientation.Horizontal) {
+  //         const delta = part.end.y - position.y
+  //
+  //         if (delta === 0) return;
+  //         updateNodes([{...node, position: {...node.position, y: node.position.y + delta}}])
+  //       }
+  //
+  //       if (part.orientation === Orientation.Vertical) {
+  //         const delta = part.end.x - position.x
+  //
+  //         if (delta === 0) return;
+  //         updateNodes([{...node, position: {...node.position, x: node.position.x + delta}}])
+  //       }
+  //     })
+  //   }
+  // }
   const setPositionLines = (node: NodeState) => {
     if (!nodeRef || !nodeRef.current) return;
 
@@ -122,18 +129,32 @@ const Node = forwardRef<NodePropsRef, NodeProps>((props, ref) => {
         y: node.position.y + (handle.clientHeight / 2) + (handleRelativePos.y / zoomTransformState.k)
       }
 
-      const sourceLines = lines.filter(line => line.source.handle?.id === (handle as HTMLElement).dataset.id)
-      const targetLines = lines.filter(line => line.target.handle?.id === (handle as HTMLElement).dataset.id)
+      const sourceLines = node.lines.filter(line => line.source.handle?.id === (handle as HTMLElement).dataset.id)
+      const targetLines = node.lines.filter(line => line.target.handle?.id === (handle as HTMLElement).dataset.id)
 
       sourceLines?.map(line => {
-        line.setSourcePosition(position)
+        const payload = setLineSourcePosition({currentLine: line, position})
+        if (!payload) return
+
+        updateLines([payload])
+        updateNodes([{...node, lines: node.lines.map((l => {
+          if (l.id === payload.id) return {...l, ...payload}
+          return l
+        }))}])
       })
       targetLines?.map(line => {
-        line.setTargetPosition(position)
+        const payload = setLineTargetPosition({currentLine: line, position})
+        if (!payload) return
+
+        updateLines([payload])
+        updateNodes([{...node, lines: node.lines.map((l => {
+            if (l.id === payload.id) return {...l, ...payload}
+            return l
+          }))}])
       })
     }
   }
-  const setTransformLines = () => {
+  const setTransformLines = (node: NodeState) => {
     if (!nodeRef || !nodeRef.current) return;
 
     const handles = nodeRef.current!.querySelectorAll('.flowchart-editor_handle')
@@ -147,11 +168,19 @@ const Node = forwardRef<NodePropsRef, NodeProps>((props, ref) => {
         y: node.position.y + (handle.clientHeight / 2) + (handleRelativePos.y / zoomTransformState.k)
       }
 
-      lines.filter(line => line.source.handle?.id === (handle as HTMLElement).dataset.id)?.map(line => {
-        line.setTransform({position})
+      node.lines.filter(line => line.source.handle?.id === (handle as HTMLElement).dataset.id)?.map(line => {
+        // const payload = setLineTransform({line, position})
+        // payload && updateLines([payload])
       })
-      lines.filter(line => line.target.handle?.id === (handle as HTMLElement).dataset.id)?.map(line => {
-        line.setTransform({position})
+      node.lines.filter(line => line.target.handle?.id === (handle as HTMLElement).dataset.id)?.map(line => {
+        const payload = setLineTransform({line, position})
+        if (!payload) return
+        console.log({payload})
+        updateLines([payload])
+        updateNodes([{...node, lines: node.lines.map((l => {
+            if (l.id === payload.id) return {...l, ...payload}
+            return l
+          }))}])
       })
     }
   }
@@ -179,27 +208,31 @@ const Node = forwardRef<NodePropsRef, NodeProps>((props, ref) => {
         }
 
         selection.style('transform', getTransformTranslateStyle(nodePosition))
-
-        // setPositionNode(nodePosition)
-        updateNodes([{...node, position: nodePosition}])
         setPositionLines({...node, position: nodePosition})
       })
       .on('end', function (event, d) {
         if (!node.drag) return
-        setTransformLines()
+
+        const nodePosition: NodeState['position'] = {
+          x: node.position.x - ((startXPos - event.x) / zoomTransformState.k),
+          y: node.position.y - ((startYPos - event.y) / zoomTransformState.k)
+        }
+
+        setTransformLines({...node, position: nodePosition})
+        updateNodes([{...node, position: nodePosition}])
       })
 
     // @ts-ignore
     selection.call(dragBehavior)
-  }, [zoomTransformState, node, lines])
-  useEffect(() => {
-    setPositionNodeByDelta()
-  }, [node, lines, zoomTransformState])
-  useEffect(() => {
-    const selection = select(nodeRef.current)
-
-    selection.style('transform', getTransformTranslateStyle(node.position))
-  }, [node])
+  }, [zoomTransformState, node])
+  // useEffect(() => {
+  //   setPositionNodeByDelta()
+  // }, [node, zoomTransformState])
+  // useEffect(() => {
+  //   const selection = select(nodeRef.current)
+  //
+  //   selection.style('transform', getTransformTranslateStyle(node.position))
+  // }, [node])
 
   console.log('Node', {props})
 
@@ -226,7 +259,7 @@ const Node = forwardRef<NodePropsRef, NodeProps>((props, ref) => {
 })
 
 Node.displayName = 'FlowchartNode'
-const areEqual = (prevProps: NodeProps, nextProps: NodeProps) => isEqual(prevProps.node, nextProps.node)
-export default React.memo(Node, areEqual)
+export default React.memo(Node)
+
 export * from './utils'
 export * from './types'
