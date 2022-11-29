@@ -14,7 +14,7 @@ export interface FlowchartEditorActions {
   setNodes(nodes: NodeDTO[]): void
   updateNodes(nodes: NodeState[]): void
   removeNodes(nodes: NodeState['id'][]): void
-  setLines(lines: LineDTO[], cb?:(lines: LineState[]) => void): void
+  setLines(lines: LineDTO[]): void
   updateLines(lines: LineState[]): void
   removeLines(lines: LineState['id'][]): void
   setZoomTransformState(payload: ZoomTransform): void

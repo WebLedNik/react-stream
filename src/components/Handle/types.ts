@@ -9,6 +9,7 @@ export interface HandleValues{
   id: string
   type: HandleTypeNames
   direction: Directions
+  node: string
 }
 
 export interface HandleActions{

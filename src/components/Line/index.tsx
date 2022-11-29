@@ -4,21 +4,20 @@ import './style.css'
 import {LineState, LineStateNames, Part, PartStateNames} from "./types";
 import {select} from "d3-selection";
 import Path from "./Path";
-import {getRootElement} from "../../utils";
+import {getRelativePosition} from "../../utils";
 import TextPath from "./TextPath";
-import {isEqual, once} from "lodash";
-import {ZoomTransform} from "d3-zoom";
 import {
-  getIsLineModified,
   getLineTargetPosition,
   getMarkerType,
-  setLinePart,
+  setLineSourcePosition,
   setLineState,
   setLineStatePart,
-  setLineTransform
+  setLineTargetPosition
 } from "./utils";
 import {FlowchartEditorState, useStore} from "../../store";
 import shallow from "zustand/shallow";
+import {getHandleElement, HandleTypeNames, HandleValues} from "../Handle";
+import {getNodeElement} from "../Node";
 
 interface ContentProps {
   line: LineState
@@ -30,49 +29,12 @@ const Line: React.FC<ContentProps> = (props) => {
 
   const handleLineTargetRef = useRef(null)
 
-  const handleMouseUp = (event: MouseEvent) => {
-    console.log('handleMouseUp', {line})
-    event.stopPropagation()
-    event.preventDefault()
-
-    getRootElement().removeEventListener('mousemove', handleMouseMove)
-
-    if (!getIsLineModified(line.state)) return
-
-    const x = (event.x - zoomTransformState.x) / zoomTransformState.k
-    const y = (event.y - zoomTransformState.y) / zoomTransformState.k
-
-    const payload = setLineTransform({line, position: {x, y}})
-    updateLines([payload])
-
-    return;
-  }
-
-  const handleMouseMove = (event: MouseEvent) => {
-    console.log('handleMouseMove')
-    event.stopPropagation()
-    event.preventDefault()
-
-    if (!getIsLineModified(line.state)) return
-
-    const x = (event.x - zoomTransformState.x) / zoomTransformState.k
-    const y = (event.y - zoomTransformState.y) / zoomTransformState.k
-
-    const payload = setLinePart({currentLine: line, position: {x, y}})
-    payload && updateLines([payload])
-    return;
-  }
-
   const handleMouseDown = (event: MouseEvent) => {
-    console.log('handleMouseDown')
     event.stopPropagation();
     event.preventDefault()
 
     const payload = setLineState({line, state: LineStateNames.Created})
     updateLines([payload])
-    //
-    // getRootElement().addEventListener('mousemove', handleMouseMove)
-    // getRootElement().addEventListener('mouseup', handleMouseUp, {once: true})
   }
 
   const handleMouseClick = (event: MouseEvent) => {
@@ -100,10 +62,8 @@ const Line: React.FC<ContentProps> = (props) => {
 
     selectionHandleLineTarget.on('mousedown', handleMouseDown)
     selectionHandleLineTarget.on('click', handleMouseClick)
-
   }, [line])
 
-  console.log('Line', {line})
 
   return (
     <g className={'flowchart-editor_line'}>

@@ -1,6 +1,7 @@
 import {v4 as uuidv4} from 'uuid';
 import {NodeDTO, NodeState, NodeStateNames, NodeValues} from "./types";
 import {Position} from "../../types";
+import {getRootElement} from "../../utils";
 
 const DEFAULT_WIDTH = 250
 const DEFAULT_HEIGHT = 150
@@ -14,7 +15,6 @@ export class Node implements NodeValues{
   width: number;
   position: NodeState['position']
   drag: boolean
-  lines: NodeState['lines']
 
   constructor(payload: NodeDTO) {
     this.id = uuidv4()
@@ -22,9 +22,15 @@ export class Node implements NodeValues{
     this.width = payload.width ?? DEFAULT_WIDTH
     this.height = payload.height ?? DEFAULT_HEIGHT
     this.position = payload.position ?? {x: DEFAULT_POSITION_X, y: DEFAULT_POSITION_Y}
-    this.drag = true
-    this.lines = payload.lines ?? []
+    this.drag = payload.drag ?? true
   }
+}
+
+export function getNodeElement(id: string): HTMLDivElement | undefined | null{
+  const rootElement = getRootElement()
+  if (!rootElement) return
+
+  return rootElement.querySelector(`[data-id='${id}']`) as HTMLDivElement
 }
 
 export function getRectangleVerticesCoordinate(node: NodeState): {left_top: Position, left_bottom: Position, right_top: Position, right_bottom: Position}{

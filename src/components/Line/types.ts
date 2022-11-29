@@ -35,6 +35,16 @@ export interface LineValues {
   drawnParts: number
 }
 
+export interface LineActions {}
+
+export interface LineDTO {
+  source: { handle?: HandleState, line?: LineState, position: Position }
+  target: { handle?: HandleState, line?: LineState, position: Position }
+  parts?: Part[]
+  state?: LineStateNames
+  drawnParts?: number
+}
+
 export interface GetLineDTOProps {
   position: Position
   handle: HandleState
@@ -82,16 +92,6 @@ export interface SetLineStatePartProps{
   parts: Part[]
   part: Part
   state: PartStateNames
-}
-
-export interface LineActions {}
-
-export interface LineDTO {
-  source: { handle?: HandleState, line?: LineState, position: Position }
-  target: { handle?: HandleState, line?: LineState, position: Position }
-  parts?: Part[]
-  state?: LineStateNames
-  drawnParts?: number
 }
 
 export type LineState = LineValues & LineActions

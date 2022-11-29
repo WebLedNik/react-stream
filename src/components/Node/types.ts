@@ -11,7 +11,7 @@ export interface NodeDTO{
   width?: number
   height?: number
   position?: Position
-  lines?: Array<LineState>
+  drag?: boolean
 }
 
 export interface NodeValues{
@@ -21,7 +21,6 @@ export interface NodeValues{
   height: number
   position: Position
   drag: boolean
-  lines: Array<LineState>
 }
 
 export interface NodeActions{

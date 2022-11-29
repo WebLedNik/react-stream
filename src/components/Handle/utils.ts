@@ -35,9 +35,10 @@ export function getHandleProps(id: string): HandleValues | undefined{
 
   const type = handle.dataset.handleType
   const direction = handle.dataset.direction
+  const node = handle.dataset.node
 
-  if (!type || !direction) return
+  if (!type || !direction || !node) return
 
   // @ts-ignore
-  return {id, type, direction}
+  return {id, type, direction, node}
 }

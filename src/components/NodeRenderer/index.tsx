@@ -10,7 +10,6 @@ export interface NodeRendererProps{
 const NodeRenderer: React.FC<NodeRendererProps> = (props) => {
   const {} = props
   const nodes = useStore((state: FlowchartEditorState) => state.nodes, shallow)
-  console.log('NodeRenderer')
   return(
     <div className={'flowchart-editor_nodes'}>
       {nodes.map(node => <Node key={node.id} node={node}/>)}

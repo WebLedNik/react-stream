@@ -6,7 +6,8 @@ import {zoom} from "d3-zoom";
 import {FlowchartEditorState, useStore} from "../../store";
 import {getRootElement} from "../../utils";
 import {NodeStateNames} from "../Node";
-import {LineStateNames, setLineState} from "../Line";
+import {getIsLineModified, LineStateNames, setLinePart, setLineState, setLineTransform} from "../Line";
+import useEventListener from "../../hooks/useEventListener";
 
 export interface ZoomPaneProps extends PropsWithChildren {
 }
@@ -15,22 +16,48 @@ const ZoomPane: React.FC<ZoomPaneProps> = ({children}) => {
   const refZoomPane = useRef(null)
   const {zoomTransformState, setZoomTransformState, nodes, lines, updateNodes, updateLines}: FlowchartEditorState = useStore((state) => state)
 
+  const handleMouseUp = (event: MouseEvent) => {
+    event.preventDefault()
+
+    const line = lines.find(l => getIsLineModified(l.state))
+    if (!line) return
+
+    const x = (event.x - zoomTransformState.x) / zoomTransformState.k
+    const y = (event.y - zoomTransformState.y) / zoomTransformState.k
+
+    const payload = setLineTransform({line: line, position: {x, y}})
+    updateLines([payload])
+  }
+  const handleMouseMove = (event: MouseEvent) => {
+    event.preventDefault()
+
+    const line = lines.find(l => getIsLineModified(l.state))
+    if (!line) return
+
+    const x = (event.x - zoomTransformState.x) / zoomTransformState.k
+    const y = (event.y - zoomTransformState.y) / zoomTransformState.k
+
+    const payload = setLinePart({currentLine: line, position: {x, y}})
+    payload && updateLines([payload])
+  }
+
+  useEventListener("mouseup", handleMouseUp, refZoomPane)
+  useEventListener("mousemove", handleMouseMove, refZoomPane)
   useEffect(() => {
     const selection = select(refZoomPane.current)
 
-    selection.on('click', (event) => {
-      const LEFT_MOUSE_BTN = 0
-
-      // Сброс выделенных объектов
-      if (event.button === LEFT_MOUSE_BTN){
-        updateNodes(nodes.map(n => ({...n, state: NodeStateNames.Fixed})))
-        updateLines(lines.map(l => setLineState({line: l, state: LineStateNames.Fixed})))
-      }
-    })
+    // selection.on('click', (event) => {
+    //   const LEFT_MOUSE_BTN = 0
+    //
+    //   // Сброс выделенных объектов
+    //   if (event.button === LEFT_MOUSE_BTN){
+    //     updateNodes(nodes.map(n => ({...n, state: NodeStateNames.Fixed})))
+    //     updateLines(lines.map(l => setLineState({line: l, state: LineStateNames.Fixed})))
+    //   }
+    // })
 
     const zoomBehavior = zoom()
       .on('start', (event) => {
-        console.log({event})
         const editorElement = getRootElement()
         if (!editorElement) return
 

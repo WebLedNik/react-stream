@@ -5,6 +5,7 @@ import {isEqualArray} from "../../utils";
 import Line, {LineState} from "../Line";
 import {FlowchartEditorState, useStore} from "../../store";
 import shallow from "zustand/shallow";
+import {useEffect} from "react";
 
 export interface LineRendererProps {
 }
@@ -12,9 +13,9 @@ export interface LineRendererProps {
 const LineRenderer: React.FC<LineRendererProps> = (props) => {
   const {} = props
   const lines = useStore((state: FlowchartEditorState) => state.lines, shallow)
-  console.log('LineRenderer')
 
-
+  useEffect(() => {
+  }, [lines])
 
   return (
     <svg className={'flowchart-editor_lines'}>

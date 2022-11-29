@@ -48,12 +48,10 @@ const Handle: React.FC<HandleProps> = (props) => {
     const x = node.position.x + (eventTarget.clientWidth / 2) + (handleRelativePos.x / zoomTransformState.k)
     const y = node.position.y + (eventTarget.clientHeight / 2) + (handleRelativePos.y / zoomTransformState.k)
 
-    const payloadHandle = {id: handleId, type, direction}
+    const payloadHandle = {id: handleId, type, direction, node: node.id}
     const payloadLine = getLineDTO({handle: payloadHandle, position: {x,y}})
 
-    setLines([payloadLine], (lines) => {
-      updateNodes([{...node, lines: [...node.lines, ...lines]}])
-    })
+    setLines([payloadLine])
   }
   const handleMouseUp = (event: MouseEvent) => {
     event.preventDefault()
@@ -74,12 +72,11 @@ const Handle: React.FC<HandleProps> = (props) => {
     const line = lines.find(l => l.state === LineStateNames.Created)
     if (!line) return;
 
-    const payloadHandle = {id: handleId, type, direction}
+    const payloadHandle = {id: handleId, type, direction, node: node.id}
     const payloadLine = setLineTarget({currentLine: line, handle: payloadHandle, position: {x,y}})
     if (!payloadLine) return;
-
+    console.log('handleMouseUp', {line, payloadLine})
     updateLines([payloadLine])
-    updateNodes([{...node, lines: [...node.lines, payloadLine]}])
   }
 
   useEffect(() => {
@@ -104,7 +101,7 @@ const Handle: React.FC<HandleProps> = (props) => {
     ])}
     ref={handleRef}
     data-id={handleId}
-    data-parent={node.id}
+    data-node={node.id}
     data-handle-type={type}
     data-direction={direction}
   >

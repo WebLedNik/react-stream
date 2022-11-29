@@ -7,16 +7,20 @@ import {
   LineValues,
   MAX_DRAWN_PARTS,
   Part,
-  PartStateNames, SetLinePartProps, SetLineSourcePositionProps,
-  SetLineSourceProps, SetLineStatePartProps,
-  SetLineStateProps, SetLineTargetPositionProps, SetLineTargetProps,
+  PartStateNames,
+  SetLinePartProps,
+  SetLineSourcePositionProps,
+  SetLineSourceProps,
+  SetLineStatePartProps,
+  SetLineStateProps,
+  SetLineTargetPositionProps,
+  SetLineTargetProps,
   SetLineTransformProps,
 } from "./types";
 import {Directions, Orientation, Position} from "../../types";
 import {getOrientationFromDirection} from "../Handle";
 import {MarkerTypeNames} from "../LineRenderer";
 import {getInvertedOrientation} from "../../utils";
-import {line} from "d3";
 
 const removeRudimentsParts = (parts: Part[]) => {
   return parts.reduce((result: Part[], targetPart: Part, targetPartIndex: number, array) => {
@@ -94,8 +98,7 @@ export function setLineTransform(props: SetLineTransformProps): LineState {
     ...line,
     drawnParts: 0,
     parts: removeRudimentsParts(line.parts).map(p => ({...p, state: PartStateNames.Fixed})),
-    state: LineStateNames.Fixed,
-    target: {...line.target, position}
+    state: LineStateNames.Fixed
   }
 }
 
@@ -123,12 +126,89 @@ export function setLineTarget(props: SetLineTargetProps): LineState | undefined 
 
   if (!handle || !position) return
 
-  const handleOrientation = getOrientationFromDirection({direction: handle.direction})
   const part = getEndPart(currentLine.parts)
-
   if (!part) return;
-  if (part.orientation === handleOrientation) return;
 
+  const handleOrientation = getOrientationFromDirection({direction: handle.direction})
+  if (part.orientation === handleOrientation) {
+    const updatingPart = part
+
+    if (currentLine.parts.length === 1){
+      if (!currentLine.source.handle) return
+
+      const diffPos: Position = {
+        x: position.x - currentLine.source.position.x,
+        y: position.y - currentLine.source.position.y,
+      }
+
+      const oneOrientation = getOrientationFromDirection({direction: currentLine.source.handle.direction})
+      const one: Part = {
+        id: uuidv4(),
+        lineId: currentLine.id,
+        orientation: oneOrientation,
+        state: PartStateNames.Fixed,
+        start: currentLine.source.position,
+        end: {
+          x: (oneOrientation === Orientation.Horizontal) ? updatingPart.start.x + getMiddleLine({
+            direction: currentLine.source.handle.direction,
+            sourcePosition: updatingPart.start,
+            targetPosition: updatingPart.end
+          }) : updatingPart.end.x,
+          y: (oneOrientation === Orientation.Vertical) ? updatingPart.start.y + getMiddleLine({
+            direction: currentLine.source.handle.direction,
+            sourcePosition: updatingPart.start,
+            targetPosition: updatingPart.end
+          }) : updatingPart.end.y,
+        }}
+
+      const twoOrientation = getInvertedOrientation(oneOrientation)
+      const two: Part = {
+        id: uuidv4(),
+        lineId: currentLine.id,
+        orientation: oneOrientation,
+        state: PartStateNames.Fixed,
+        start: one.end,
+        end: {
+          x: (twoOrientation === Orientation.Horizontal) ? one.end.x + diffPos.x : one.end.x,
+          y: (twoOrientation === Orientation.Vertical) ? one.end.y + diffPos.y : one.end.y,
+        }
+      }
+
+      const threeOrientation = getInvertedOrientation(twoOrientation)
+      const three: Part = {
+        ...updatingPart,
+        start: two.end,
+        end: position
+      }
+
+      return {...currentLine, target: payloadTarget, parts: [...currentLine.parts.slice(0, -1), one,two,three]}
+    }
+
+    const prevPart = getPrevPart({parts: currentLine.parts, part: updatingPart})
+    if (!prevPart) return
+
+    const diffPos: Position = {
+      x: position.x - updatingPart.start.x,
+      y: position.y - updatingPart.start.y,
+    }
+
+    const oneOrientation = prevPart.orientation
+    const one: Part = {
+     ...prevPart,
+      end: {
+        x: (oneOrientation === Orientation.Horizontal) ? updatingPart.start.x + diffPos.x : updatingPart.start.x,
+        y: (oneOrientation === Orientation.Vertical) ? updatingPart.start.y + diffPos.y : updatingPart.start.y,
+      }}
+
+    const two: Part = {
+      ...updatingPart,
+      start: one.end,
+      end: position
+    }
+
+    return {...currentLine, target: payloadTarget, parts: [...currentLine.parts.slice(0, -2), one,two]}
+  }
+  console.log({currentLine, handle, line, position, part, handleOrientation})
   if (part.orientation === Orientation.Horizontal) {
     const oneOrientation = getInvertedOrientation(part.orientation)
     const one: Part = {
@@ -224,7 +304,7 @@ export function setLineTarget(props: SetLineTargetProps): LineState | undefined 
 
 export function setLinePart(props: SetLinePartProps): LineState | undefined {
   const {currentLine, position} = props
-console.log({currentLine, position})
+
   if (currentLine.state === LineStateNames.Created) {
     const lastPart = getEndPart(currentLine.parts)
     if (!lastPart) {
@@ -444,7 +524,6 @@ console.log({currentLine, position})
     }
     if (!prevPart && nextPart) {
       if (!currentLine.source.handle) return;
-      console.log('Пред нет След есть Источник есть', {updatingPart})
 
       // const validateIntervalPart = updatingPart
       //
