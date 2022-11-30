@@ -46,16 +46,6 @@ const ZoomPane: React.FC<ZoomPaneProps> = ({children}) => {
   useEffect(() => {
     const selection = select(refZoomPane.current)
 
-    // selection.on('click', (event) => {
-    //   const LEFT_MOUSE_BTN = 0
-    //
-    //   // Сброс выделенных объектов
-    //   if (event.button === LEFT_MOUSE_BTN){
-    //     updateNodes(nodes.map(n => ({...n, state: NodeStateNames.Fixed})))
-    //     updateLines(lines.map(l => setLineState({line: l, state: LineStateNames.Fixed})))
-    //   }
-    // })
-
     const zoomBehavior = zoom()
       .on('start', (event) => {
         const editorElement = getRootElement()

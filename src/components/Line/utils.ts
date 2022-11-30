@@ -208,7 +208,7 @@ export function setLineTarget(props: SetLineTargetProps): LineState | undefined 
 
     return {...currentLine, target: payloadTarget, parts: [...currentLine.parts.slice(0, -2), one,two]}
   }
-  console.log({currentLine, handle, line, position, part, handleOrientation})
+
   if (part.orientation === Orientation.Horizontal) {
     const oneOrientation = getInvertedOrientation(part.orientation)
     const one: Part = {

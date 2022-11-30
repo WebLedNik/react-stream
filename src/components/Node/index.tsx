@@ -4,12 +4,13 @@ import './style.css'
 import {FlowchartEditorState, useStore} from "../../store";
 import {select} from "d3-selection";
 import {drag} from "d3-drag";
-import {NodeState} from "./types";
+import {NodeState, NodeStateNames} from "./types";
 import {getRelativePosition, getTransformTranslateStyle} from "../../utils";
 import Handle, {HandleTypeNames} from "../Handle";
 import {Directions, Position} from "../../types";
 import {setLineSourcePosition, setLineTargetPosition} from "../Line";
 import shallow from "zustand/shallow";
+import Moveable from "react-moveable";
 
 export interface NodeProps {
   node: NodeState
@@ -30,6 +31,8 @@ const Node = forwardRef<NodePropsRef, NodeProps>((props, ref) => {
     updateLines: state.updateLines,
     lines: state.lines
   }), shallow)
+
+  const [target, setTarget] = useState<HTMLDivElement | null | undefined>();
 
   const setPositionLines = (node: NodeState) => {
     if (!nodeRef || !nodeRef.current) return;
@@ -102,8 +105,15 @@ const Node = forwardRef<NodePropsRef, NodeProps>((props, ref) => {
     // @ts-ignore
     selection.call(dragBehavior)
   }, [zoomTransformState, node, lines])
+  useEffect(() => {
+    setTarget(nodeRef.current);
+  }, [node, nodeRef]);
+  useEffect(() => {
+    setPositionLines(node)
+  }, [node.width, node.height])
 
   return (
+    <>
       <div
         className={'flowchart-editor_node'}
         ref={nodeRef}
@@ -120,7 +130,26 @@ const Node = forwardRef<NodePropsRef, NodeProps>((props, ref) => {
         <Handle type={HandleTypeNames.Input} node={node} direction={Directions.Left}/>
         <Handle type={HandleTypeNames.Output} node={node} direction={Directions.Right}/>
         <Handle type={HandleTypeNames.Output} node={node} direction={Directions.Top}/>
+        {node.state === NodeStateNames.Selected &&
+            <Moveable
+                target={target}
+                resizable={true}
+                renderDirections={["nw", "n", "ne", "w", "e", "sw", "s", "se"]}
+                throttleResize={0}
+                edge={false}
+                origin={false}
+                padding={{left: 4, top: 4, right: 4, bottom: 4}}
+                onResize={({target, width, height, delta}) => {
+                  delta[0] && (target!.style.width = `${width}px`);
+                  delta[1] && (target!.style.height = `${height}px`);
+                }}
+                onResizeEnd={({target}) => {
+                  updateNodes([{...node, width: target.clientWidth, height: target.clientHeight}])
+                }}
+            />
+        }
       </div>
+    </>
   )
 })
 

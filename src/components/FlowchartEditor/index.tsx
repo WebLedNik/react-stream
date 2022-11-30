@@ -4,7 +4,7 @@ import Background from "../Background";
 import Wrapper from "./Wrapper";
 import GraphView from "../GraphView";
 import Controls from "../Controls";
-import '../../utils/selecto'
+import SelectionArea from "../SelectionArea";
 
 export interface FlowchartEditorProps extends PropsWithChildren {
 }
@@ -18,6 +18,7 @@ const FlowchartEditor = forwardRef<FlowchartEditorRefProps, FlowchartEditorProps
           <GraphView/>
           <Background/>
           <Controls/>
+          <SelectionArea/>
           {/*<Map/>*/}
         </Wrapper>
       </div>

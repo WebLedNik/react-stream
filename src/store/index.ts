@@ -32,7 +32,6 @@ const createStore = () => create<FlowchartEditorState>((setState, getState) => (
 
       return node
     })
-
     setState({nodes: payload})
   },
   removeNodes(nodes: NodeState['id'][]) {
