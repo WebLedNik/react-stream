@@ -3,7 +3,7 @@ import {PropsWithChildren, useEffect, useRef} from "react";
 import './style.css'
 import {FlowchartEditorState, useStore} from "../../store";
 import {select} from "d3-selection";
-import {getTransformTranslateScaleStyle} from "../../utils";
+import {getTransformTranslateScaleStyle, getTransformTranslateStyle} from "../../utils";
 
 interface ViewportProps extends PropsWithChildren{}
 const Viewport: React.FC<ViewportProps> = ({children, ...props}) => {

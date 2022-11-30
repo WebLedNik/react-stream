@@ -1,5 +1,5 @@
 import * as React from 'react'
-import {forwardRef, useEffect, useRef} from 'react'
+import {forwardRef, useEffect, useRef, useState} from 'react'
 import './style.css'
 import {FlowchartEditorState, useStore} from "../../store";
 import {select} from "d3-selection";
@@ -7,8 +7,8 @@ import {drag} from "d3-drag";
 import {NodeState} from "./types";
 import {getRelativePosition, getTransformTranslateStyle} from "../../utils";
 import Handle, {HandleTypeNames} from "../Handle";
-import {Directions, Orientation, Position} from "../../types";
-import {getEndPart, getStartPart, setLineSourcePosition, setLineTargetPosition, setLineTransform} from "../Line";
+import {Directions, Position} from "../../types";
+import {setLineSourcePosition, setLineTargetPosition} from "../Line";
 import shallow from "zustand/shallow";
 
 export interface NodeProps {
@@ -68,7 +68,6 @@ const Node = forwardRef<NodePropsRef, NodeProps>((props, ref) => {
 
     let startXPos: number = 0
     let startYPos: number = 0
-    let nodePosition: Position = {x:0, y: 0}
 
     const dragBehavior = drag()
       .on('start', function (event, d) {
@@ -81,7 +80,7 @@ const Node = forwardRef<NodePropsRef, NodeProps>((props, ref) => {
       .on('drag', function (event, d) {
         if (!node.drag) return
 
-        nodePosition = {
+        const nodePosition: Position = {
           x: node.position.x - ((startXPos - event.x) / zoomTransformState.k),
           y: node.position.y - ((startYPos - event.y) / zoomTransformState.k)
         }
@@ -92,6 +91,11 @@ const Node = forwardRef<NodePropsRef, NodeProps>((props, ref) => {
       .on('end', function (event, d) {
         if (!node.drag) return
 
+        const nodePosition: Position = {
+          x: node.position.x - ((startXPos - event.x) / zoomTransformState.k),
+          y: node.position.y - ((startYPos - event.y) / zoomTransformState.k)
+        }
+
         updateNodes([{...node, position: nodePosition}])
       })
 
@@ -99,25 +103,24 @@ const Node = forwardRef<NodePropsRef, NodeProps>((props, ref) => {
     selection.call(dragBehavior)
   }, [zoomTransformState, node, lines])
 
-
   return (
-    <div
-      className={'flowchart-editor_node'}
-      ref={nodeRef}
-      data-id={node.id}
-      data-x={node.position.x}
-      data-y={node.position.y}
-      style={{
-        width: node.width,
-        height: node.height
-      }}
-    >
-      Node {node.id}
-      <Handle type={HandleTypeNames.Input} node={node} direction={Directions.Bottom}/>
-      <Handle type={HandleTypeNames.Input} node={node} direction={Directions.Left}/>
-      <Handle type={HandleTypeNames.Output} node={node} direction={Directions.Right}/>
-      <Handle type={HandleTypeNames.Output} node={node} direction={Directions.Top}/>
-    </div>
+      <div
+        className={'flowchart-editor_node'}
+        ref={nodeRef}
+        data-id={node.id}
+        data-x={node.position.x}
+        data-y={node.position.y}
+        style={{
+          width: node.width,
+          height: node.height
+        }}
+      >
+        Node {node.id}
+        <Handle type={HandleTypeNames.Input} node={node} direction={Directions.Bottom}/>
+        <Handle type={HandleTypeNames.Input} node={node} direction={Directions.Left}/>
+        <Handle type={HandleTypeNames.Output} node={node} direction={Directions.Right}/>
+        <Handle type={HandleTypeNames.Output} node={node} direction={Directions.Top}/>
+      </div>
   )
 })
 

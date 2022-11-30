@@ -75,7 +75,7 @@ const Handle: React.FC<HandleProps> = (props) => {
     const payloadHandle = {id: handleId, type, direction, node: node.id}
     const payloadLine = setLineTarget({currentLine: line, handle: payloadHandle, position: {x,y}})
     if (!payloadLine) return;
-    console.log('handleMouseUp', {line, payloadLine})
+
     updateLines([payloadLine])
   }
 

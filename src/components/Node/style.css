@@ -5,3 +5,7 @@
     background: whitesmoke;
     z-index: 5;
 }
+
+.flowchart-editor_node._selected{
+    border: 1px solid cornflowerblue;
+}
