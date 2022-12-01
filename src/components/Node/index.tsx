@@ -34,6 +34,13 @@ const Node = forwardRef<NodePropsRef, NodeProps>((props, ref) => {
 
   const [target, setTarget] = useState<HTMLDivElement | null | undefined>();
 
+  const handleClick = (event: React.MouseEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
+
+    updateNodes([{...node, state: NodeStateNames.Selected}])
+  }
+
   const setPositionLines = (node: NodeState) => {
     if (!nodeRef || !nodeRef.current) return;
 
@@ -113,7 +120,6 @@ const Node = forwardRef<NodePropsRef, NodeProps>((props, ref) => {
   }, [node.width, node.height])
 
   return (
-    <>
       <div
         className={'flowchart-editor_node'}
         ref={nodeRef}
@@ -124,6 +130,7 @@ const Node = forwardRef<NodePropsRef, NodeProps>((props, ref) => {
           width: node.width,
           height: node.height
         }}
+        onClick={handleClick}
       >
         Node {node.id}
         <Handle type={HandleTypeNames.Input} node={node} direction={Directions.Bottom}/>
@@ -135,8 +142,7 @@ const Node = forwardRef<NodePropsRef, NodeProps>((props, ref) => {
                 target={target}
                 resizable={true}
                 renderDirections={["nw", "n", "ne", "w", "e", "sw", "s", "se"]}
-                throttleResize={0}
-                edge={false}
+                throttleResize={20}
                 origin={false}
                 padding={{left: 4, top: 4, right: 4, bottom: 4}}
                 onResize={({target, width, height, delta}) => {
@@ -149,7 +155,6 @@ const Node = forwardRef<NodePropsRef, NodeProps>((props, ref) => {
             />
         }
       </div>
-    </>
   )
 })
 

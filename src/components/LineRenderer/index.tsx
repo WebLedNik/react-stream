@@ -14,9 +14,6 @@ const LineRenderer: React.FC<LineRendererProps> = (props) => {
   const {} = props
   const lines = useStore((state: FlowchartEditorState) => state.lines, shallow)
 
-  useEffect(() => {
-  }, [lines])
-
   return (
     <svg className={'flowchart-editor_lines'}>
       <defs>

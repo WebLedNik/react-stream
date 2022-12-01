@@ -14,7 +14,14 @@ export interface ZoomPaneProps extends PropsWithChildren {
 
 const ZoomPane: React.FC<ZoomPaneProps> = ({children}) => {
   const refZoomPane = useRef(null)
-  const {zoomTransformState, setZoomTransformState, nodes, lines, updateNodes, updateLines}: FlowchartEditorState = useStore((state) => state)
+  const {
+    zoomTransformState,
+    setZoomTransformState,
+    nodes,
+    lines,
+    updateNodes,
+    updateLines
+  }: FlowchartEditorState = useStore((state) => state)
 
   const handleMouseUp = (event: MouseEvent) => {
     event.preventDefault()
@@ -56,9 +63,9 @@ const ZoomPane: React.FC<ZoomPaneProps> = ({children}) => {
         editorElement.style.cursor = 'move'
       })
       .on('zoom', (event) => {
-      const zoomState = event.transform
-      setZoomTransformState(zoomState)
-    })
+        const zoomState = event.transform
+        setZoomTransformState(zoomState)
+      })
       .on('end', (event) => {
         const editorElement = getRootElement()
         if (!editorElement) return
@@ -66,10 +73,10 @@ const ZoomPane: React.FC<ZoomPaneProps> = ({children}) => {
         editorElement.style.cursor = 'default'
       })
       .filter((event) => {
-        if (event.wheelDelta) return true
-      const MIDDLE_MOUSE_BTN = 1
-      return event.button === MIDDLE_MOUSE_BTN
-    })
+        const RIGTH_MOUSE_BTN = 2
+        if (event.button === RIGTH_MOUSE_BTN) return false
+        return true
+      })
     //@ts-ignore
     selection.call(zoomBehavior)
   }, [zoomTransformState, nodes, lines])

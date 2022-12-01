@@ -5,7 +5,7 @@ import useIsomorphicLayoutEffect from "./useIsomorphicLayoutEffect";
 function useEventListener<K extends keyof MediaQueryListEventMap>(
   eventName: K,
   handler: (event: MediaQueryListEventMap[K]) => void,
-  element: RefObject<MediaQueryList>,
+  element: RefObject<MediaQueryList> | HTMLElement,
   options?: boolean | AddEventListenerOptions,
 ): void
 
@@ -13,7 +13,7 @@ function useEventListener<K extends keyof MediaQueryListEventMap>(
 function useEventListener<K extends keyof WindowEventMap>(
   eventName: K,
   handler: (event: WindowEventMap[K]) => void,
-  element?: undefined,
+  element?: undefined | HTMLElement,
   options?: boolean | AddEventListenerOptions,
 ): void
 
@@ -50,7 +50,7 @@ function useEventListener<
       | MediaQueryListEventMap[KM]
       | Event,
   ) => void,
-  element?: RefObject<T>,
+  element?: RefObject<T> | HTMLElement,
   options?: boolean | AddEventListenerOptions,
 ) {
   // Create a ref that stores handler
@@ -62,8 +62,8 @@ function useEventListener<
 
   useEffect(() => {
     // Define the listening target
-    const targetElement: T | Window = element?.current ?? window
-
+    const targetElement: T | HTMLElement | Window = (element as any)?.current ?? element ?? window
+console.log({targetElement})
     if (!(targetElement && targetElement.addEventListener)) return
 
     // Create event listener that calls handler function stored in ref
