@@ -35,7 +35,9 @@ const SelectionArea: React.FC<SelectionAreaProps> = (props) => {
     event.preventDefault()
 
     const LEFT_MOUSE_BTN = 0
+    const IS_SHIFT_BTN = event.shiftKey
 
+    if (IS_SHIFT_BTN) return
     // Сброс выделенных объектов
     if (event.button === LEFT_MOUSE_BTN) {
       updateNodes(nodes.map(n => ({...n, state: NodeStateNames.Fixed})))

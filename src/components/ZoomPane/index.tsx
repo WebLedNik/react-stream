@@ -10,9 +10,11 @@ import {getIsLineModified, LineStateNames, setLinePart, setLineState, setLineTra
 import useEventListener from "../../hooks/useEventListener";
 
 export interface ZoomPaneProps extends PropsWithChildren {
+  onDoubleClick?:(event: MouseEvent) => void
 }
 
-const ZoomPane: React.FC<ZoomPaneProps> = ({children}) => {
+const ZoomPane: React.FC<ZoomPaneProps> = ({children, ...props}) => {
+  const {onDoubleClick} = props
   const refZoomPane = useRef(null)
   const {
     zoomTransformState,
@@ -47,9 +49,16 @@ const ZoomPane: React.FC<ZoomPaneProps> = ({children}) => {
     const payload = setLinePart({currentLine: line, position: {x, y}})
     payload && updateLines([payload])
   }
+  const handleDoubleClick = (event: MouseEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
+
+    onDoubleClick && onDoubleClick(event)
+  }
 
   useEventListener("mouseup", handleMouseUp, refZoomPane)
   useEventListener("mousemove", handleMouseMove, refZoomPane)
+  useEventListener("dblclick", handleDoubleClick, refZoomPane)
   useEffect(() => {
     const selection = select(refZoomPane.current)
 
@@ -79,6 +88,8 @@ const ZoomPane: React.FC<ZoomPaneProps> = ({children}) => {
       })
     //@ts-ignore
     selection.call(zoomBehavior)
+    selection.on("dblclick.zoom", null);
+    selection.on("dblclick.click", null);
   }, [zoomTransformState, nodes, lines])
 
   return (

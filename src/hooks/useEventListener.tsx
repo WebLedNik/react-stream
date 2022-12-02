@@ -63,7 +63,7 @@ function useEventListener<
   useEffect(() => {
     // Define the listening target
     const targetElement: T | HTMLElement | Window = (element as any)?.current ?? element ?? window
-console.log({targetElement})
+
     if (!(targetElement && targetElement.addEventListener)) return
 
     // Create event listener that calls handler function stored in ref

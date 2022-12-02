@@ -7,15 +7,17 @@ import Controls from "../Controls";
 import SelectionArea from "../SelectionArea";
 
 export interface FlowchartEditorProps extends PropsWithChildren {
+  onDoubleClick?:(event: MouseEvent) => void
 }
 
 export type FlowchartEditorRefProps = HTMLDivElement
 
 const FlowchartEditor = forwardRef<FlowchartEditorRefProps, FlowchartEditorProps>(({children, ...props}, ref) => {
+  const {onDoubleClick} = props
   return (
       <div className={'flowchart-editor'}>
         <Wrapper>
-          <GraphView/>
+          <GraphView onDoubleClickZoomPane={onDoubleClick}/>
           <Background/>
           <Controls/>
           <SelectionArea/>

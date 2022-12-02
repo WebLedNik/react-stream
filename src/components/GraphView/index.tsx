@@ -6,11 +6,13 @@ import LineRenderer from "../LineRenderer";
 import {FlowchartEditorState, useStore} from "../../store";
 
 export interface GraphViewProps {
+  onDoubleClickZoomPane?:(event: MouseEvent) => void
 }
 
 const GraphView: React.FC<GraphViewProps> = (props) => {
+  const {onDoubleClickZoomPane} = props
   return (
-    <ZoomPane>
+    <ZoomPane onDoubleClick={onDoubleClickZoomPane}>
       <Viewport>
         <NodeRenderer />
         <LineRenderer />
