@@ -26,7 +26,7 @@ export function getHandleElement(id: string): HTMLDivElement | undefined | null{
   return rootElement.querySelector(`[data-id='${id}']`) as HTMLDivElement
 }
 
-export function getHandleProps(id: string): HandleValues | undefined{
+export function getHandleProps(id: string): Pick<HandleValues, 'id' | 'type' | 'direction'> | undefined{
   const rootElement = getRootElement()
   if (!rootElement) return
 
@@ -35,10 +35,9 @@ export function getHandleProps(id: string): HandleValues | undefined{
 
   const type = handle.dataset.handleType
   const direction = handle.dataset.direction
-  const node = handle.dataset.node
 
-  if (!type || !direction || !node) return
+  if (!type || !direction) return
 
   // @ts-ignore
-  return {id, type, direction, node}
+  return {id, type, direction}
 }

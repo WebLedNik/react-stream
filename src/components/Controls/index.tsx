@@ -7,7 +7,7 @@ const Controls: React.FC<ControlsProps> = () => {
   const {lines, nodes}:FlowchartEditorState = useStore((state) => state)
 
   const handleLogs = (event: React.MouseEvent) => {
-    console.log('logs', {lines, nodes})
+    console.log('Library logs', {nodes, lines})
   }
 
   return(

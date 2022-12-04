@@ -13,6 +13,7 @@ export class NodeCreator implements NodeValues {
   id: string
   type: string
   state: NodeStateNames
+  data: any;
   height: number;
   width: number;
   position: NodeState['position']
@@ -22,6 +23,7 @@ export class NodeCreator implements NodeValues {
     this.id = payload.id ?? uuidv4()
     this.type = payload.type ?? 'default'
     this.state = payload.state ?? NodeStateNames.Fixed
+    this.data = payload.data ?? null
     this.width = payload.width ?? DEFAULT_WIDTH
     this.height = payload.height ?? DEFAULT_HEIGHT
     this.position = payload.position ?? {x: DEFAULT_POSITION_X, y: DEFAULT_POSITION_Y}
@@ -45,7 +47,7 @@ export function getRectangleVerticesCoordinate(node: NodeState): { left_top: Pos
   }
 }
 
-export function getNodePropsFromDataset(id: string): Pick<NodeValues, 'position'> | undefined {
+export function getNodeProps(id: string): Pick<NodeValues, 'id' | 'position'> | undefined {
   const rootElement = getRootElement()
   if (!rootElement) return
 
@@ -59,5 +61,5 @@ export function getNodePropsFromDataset(id: string): Pick<NodeValues, 'position'
   if (!x || !y) return
 
   const position = {x: Number(x), y: Number(y)}
-  return {position}
+  return {id, position}
 }

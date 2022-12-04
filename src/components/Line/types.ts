@@ -39,7 +39,7 @@ export interface LineActions {}
 
 export interface LineDTO {
   source: { handle?: HandleState, line?: LineState, position: Position }
-  target: { handle?: HandleState, line?: LineState, position: Position }
+  target: { handle?: HandleState, line?: LineState, position?: Position }
   parts?: Part[]
   state?: LineStateNames
   drawnParts?: number

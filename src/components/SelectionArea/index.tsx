@@ -3,7 +3,7 @@ import Selecto from "react-selecto";
 import {FlowchartEditorState, useStore} from "../../store";
 import shallow from "zustand/shallow";
 import {NodeState, NodeStateNames} from "../Node";
-import {LineStateNames, setLineState} from "../Line";
+import {LineState, LineStateNames, setLineState} from "../Line";
 import {useEffect, useMemo, useRef, useState} from "react";
 import useEventListener from "../../hooks/useEventListener";
 
@@ -12,20 +12,20 @@ interface SelectionAreaProps {
   dragContainer?: HTMLElement | null
   selectableTargets?: Array<string>
   onNodesChange?:(nodes: NodeState[]) => void
+  onLinesChange?:(lines: LineState[], isCreate?: boolean) => void
 }
 
 const SelectionArea: React.FC<SelectionAreaProps> = (props) => {
   const {
-    onNodesChange
+    onNodesChange,
+    onLinesChange
   } = props
   const {
     nodes,
-    lines,
-    updateLines
+    lines
   } = useStore((state: FlowchartEditorState) => ({
     nodes: state.nodes,
     lines: state.lines,
-    updateLines: state.updateLines
   }), shallow)
 
   const [container, setContainer] = useState<HTMLElement>(document.body)
@@ -43,7 +43,7 @@ const SelectionArea: React.FC<SelectionAreaProps> = (props) => {
     // Сброс выделенных объектов
     if (event.button === LEFT_MOUSE_BTN) {
       onNodesChange && onNodesChange(nodes.map(n => ({...n, state: NodeStateNames.Fixed})))
-      updateLines(lines.map(l => setLineState({line: l, state: LineStateNames.Fixed})))
+      onLinesChange && onLinesChange(lines.map(l => setLineState({line: l, state: LineStateNames.Fixed})))
     }
   }
 

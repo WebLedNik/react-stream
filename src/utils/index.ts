@@ -9,7 +9,7 @@ export function getTransformTranslateStyle(position: Position){
   return `translate(${position.x}px, ${position.y}px)`
 }
 
-interface GetRelativePositionProps{parent: HTMLDivElement, child: HTMLDivElement}
+interface GetRelativePositionProps{parent: HTMLDivElement | HTMLElement, child: HTMLDivElement | HTMLElement}
 export function getRelativePosition({parent, child}:GetRelativePositionProps):Position {
   const parentPos = parent.getBoundingClientRect()
   const childPos = child.getBoundingClientRect()

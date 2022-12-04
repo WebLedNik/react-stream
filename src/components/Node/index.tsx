@@ -6,14 +6,15 @@ import {select} from "d3-selection";
 import {drag} from "d3-drag";
 import {NodeState, NodeStateNames} from "./types";
 import {getRelativePosition, getTransformTranslateStyle} from "../../utils";
-import {Position, SizeProps} from "../../types";
-import {setLineSourcePosition, setLineTargetPosition} from "../Line";
+import {ElementTypeNames, Position, SizeProps} from "../../types";
+import {LineState, setLineSourcePosition, setLineTargetPosition} from "../Line";
 import shallow from "zustand/shallow";
 import Moveable from "react-moveable";
 
 export interface NodeProps extends PropsWithChildren{
   node: NodeState
   onNodesChange?: (nodes: NodeState[]) => void
+  onLinesChange?:(lines: LineState[], isCreate?: boolean) => void
   onNodeDragStop?: (nodes: NodeState[]) => void
 }
 
@@ -22,31 +23,26 @@ const Node:React.FC<NodeProps> = (props) => {
   const {
     node,
     onNodesChange,
-    onNodeDragStop
+    onNodeDragStop,
+    onLinesChange
   } = props
   const nodeRef = useRef<HTMLDivElement | null>(null)
   const {
     zoomTransformState,
-    updateLines,
     lines,
     nodeTypes
   } = useStore((state: FlowchartEditorState) => ({
     zoomTransformState: state.zoomTransformState,
-    updateLines: state.updateLines,
     lines: state.lines,
     nodeTypes: state.nodeTypes
   }), shallow)
 
-  const nodeComponent = useMemo(() => nodeTypes[node.type] ?? <></>, [node.type])
+  const nodeComponent = useMemo(() => nodeTypes[node.type] ? React.createElement(nodeTypes[node.type], {...node}) : <></>, [node.type])
 
   const [target, setTarget] = useState<HTMLDivElement | null | undefined>();
 
   const handleClick = (event: React.MouseEvent) => {
-    event.preventDefault()
-    event.stopPropagation()
-
     const payload = {...node, state: NodeStateNames.Selected}
-
     onNodesChange && onNodesChange([payload])
   }
 
@@ -77,19 +73,26 @@ const Node:React.FC<NodeProps> = (props) => {
         const payload = setLineSourcePosition({currentLine: line, position})
         if (!payload) return
 
-        updateLines([payload])
+        onLinesChange && onLinesChange([payload])
       })
       targetLines?.map(line => {
         const payload = setLineTargetPosition({currentLine: line, position})
         if (!payload) return
 
-        updateLines([payload])
+        onLinesChange && onLinesChange([payload])
       })
     }
   }
 
   useEffect(() => {
     const selection = select(nodeRef.current)
+
+    selection.on('click', function (event, d){
+      event.preventDefault()
+      event.stopPropagation()
+
+      handleClick(event)
+    }, {capture: true})
 
     const dragBehavior = drag()
       .on('start', function (event, d) {
@@ -137,21 +140,14 @@ const Node:React.FC<NodeProps> = (props) => {
       data-id={node.id}
       data-x={node.position.x}
       data-y={node.position.y}
+      data-element-type={ElementTypeNames.Node}
       style={{
         width: node.width,
         height: node.height,
         transform: getTransformTranslateStyle(node.position)
       }}
-      onClick={handleClick}
     >
-      {/*Node {node.id}*/}
-      <>
-        {nodeComponent}
-      </>
-      {/*<Handle type={HandleTypeNames.Input} node={node} direction={Directions.Bottom}/>*/}
-      {/*<Handle type={HandleTypeNames.Input} node={node} direction={Directions.Left}/>*/}
-      {/*<Handle type={HandleTypeNames.Output} node={node} direction={Directions.Right}/>*/}
-      {/*<Handle type={HandleTypeNames.Output} node={node} direction={Directions.Top}/>*/}
+      {nodeComponent}
       {node.state === NodeStateNames.Selected &&
           <Moveable
               target={target}

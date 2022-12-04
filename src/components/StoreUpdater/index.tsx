@@ -16,8 +16,7 @@ const StoreUpdater: React.FC<StoreUpdaterProps> = (props) => {
     lines,
     nodeTypes
   } = props
-  const {setNodes, setLinesWithoutDTO, setNodeTypes}:FlowchartEditorState = useStore((state) => state)
-
+  const {setNodes, setNodeTypes, setLines}:FlowchartEditorState = useStore((state) => state)
 
   useEffect(() => {
     if (!nodes) return
@@ -26,7 +25,7 @@ const StoreUpdater: React.FC<StoreUpdaterProps> = (props) => {
 
   useEffect(() => {
     if (!lines) return
-    setLinesWithoutDTO(lines)
+    setLines(lines)
   }, [lines])
 
   useEffect(() => {

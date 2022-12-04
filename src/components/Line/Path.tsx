@@ -2,7 +2,7 @@ import * as React from "react";
 import {useEffect, useMemo, useRef, useState} from "react";
 import cc from "classcat"
 import {Part} from "./types";
-import {Orientation} from "../../types";
+import {ElementTypeNames, Orientation} from "../../types";
 import {select} from "d3-selection";
 import {FlowchartEditorState, useStore} from "../../store";
 import {MarkerProps, MarkerTypeNames} from "../LineRenderer/types";
@@ -74,13 +74,6 @@ const Path: React.FC<PathProps> = (props) => {
     onMouseLeave && onMouseLeave(event, payloadTargetPart)
   }
 
-  const handleClick = (event: React.MouseEvent) => {
-    event.stopPropagation()
-    event.preventDefault()
-
-    onClick && onClick(event)
-  }
-
   const handleMouseDown = (event: MouseEvent) => {
     event.stopPropagation()
     event.preventDefault()
@@ -94,22 +87,20 @@ const Path: React.FC<PathProps> = (props) => {
     selection.on('mousedown', handleMouseDown)
     selection.on('mouseenter', handleMouseEnter)
     selection.on('mouseleave', handleMouseLeave)
-    selection.on('click', handleClick)
   }, [parts, transformingPart, lines])
 
   return (
-    <>
     <path
       id={id}
       ref={pathRef}
       className={cc(['flowchart-editor_line-path', {['_updating']: updating, ['_selected']: selected}])}
+      cursor={cursor}
       d={d}
       pointerEvents={'stroke'}
       markerEnd={`url(#${MarkerProps?.type ?? MarkerTypeNames.Arrow}${(updating ? '-updating' : '')})`}
-      onClick={handleClick}
-      cursor={cursor}
+      data-id={id}
+      data-element-type={ElementTypeNames.Path}
     />
-    </>
   )
 }
 

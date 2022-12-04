@@ -20,7 +20,8 @@ import {
 import {Directions, Orientation, Position} from "../../types";
 import {getOrientationFromDirection} from "../Handle";
 import {MarkerTypeNames} from "../LineRenderer";
-import {getInvertedOrientation} from "../../utils";
+import {getInvertedOrientation, getRootElement} from "../../utils";
+import {NodeValues} from "../Node";
 
 const removeRudimentsParts = (parts: Part[]) => {
   return parts.reduce((result: Part[], targetPart: Part, targetPartIndex: number, array) => {
@@ -181,7 +182,7 @@ export function setLineTarget(props: SetLineTargetProps): LineState | undefined 
         end: position
       }
 
-      return {...currentLine, target: payloadTarget, parts: [...currentLine.parts.slice(0, -1), one,two,three]}
+      return {...currentLine, state: LineStateNames.Fixed, target: payloadTarget, parts: [...currentLine.parts.slice(0, -1), one,two,three]}
     }
 
     const prevPart = getPrevPart({parts: currentLine.parts, part: updatingPart})
@@ -206,7 +207,7 @@ export function setLineTarget(props: SetLineTargetProps): LineState | undefined 
       end: position
     }
 
-    return {...currentLine, target: payloadTarget, parts: [...currentLine.parts.slice(0, -2), one,two]}
+    return {...currentLine, state: LineStateNames.Fixed, target: payloadTarget, parts: [...currentLine.parts.slice(0, -2), one,two]}
   }
 
   if (part.orientation === Orientation.Horizontal) {
@@ -252,7 +253,7 @@ export function setLineTarget(props: SetLineTargetProps): LineState | undefined 
       end: two.start
     }
 
-    return {...currentLine, target: payloadTarget, parts: [...currentLine.parts.slice(0, -2), three, two, one]}
+    return {...currentLine, state: LineStateNames.Fixed, target: payloadTarget, parts: [...currentLine.parts.slice(0, -2), three, two, one]}
   }
   if (part.orientation === Orientation.Vertical) {
     const oneOrientation = getInvertedOrientation(part.orientation)
@@ -297,7 +298,7 @@ export function setLineTarget(props: SetLineTargetProps): LineState | undefined 
       end: two.start
     }
 
-    return {...currentLine, target: payloadTarget, parts: [...currentLine.parts.slice(0, -2), three, two, one]}
+    return {...currentLine, state: LineStateNames.Fixed, target: payloadTarget, parts: [...currentLine.parts.slice(0, -2), three, two, one]}
   }
   return
 }
@@ -1069,4 +1070,21 @@ export function setLengthLine(props: SetLengthLineProps) {
     case Directions.Right:
       return (length ?? defaultLength)
   }
+}
+
+export function getLineElement(id: string): HTMLDivElement | undefined | null {
+  const rootElement = getRootElement()
+  if (!rootElement) return
+
+  return rootElement.querySelector(`[data-id='${id}']`) as HTMLDivElement
+}
+
+export function getLineProps(id: string): Pick<LineValues, 'id'> | undefined {
+  const rootElement = getRootElement()
+  if (!rootElement) return
+
+  const line = rootElement.querySelector(`[data-id='${id}']`) as HTMLDivElement
+  if (!line) return
+
+  return {id}
 }

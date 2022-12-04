@@ -16,54 +16,28 @@ import {
 } from "./utils";
 import {FlowchartEditorState, useStore} from "../../store";
 import shallow from "zustand/shallow";
-import {getHandleElement, HandleTypeNames, HandleValues} from "../Handle";
-import {getNodeElement} from "../Node";
+import {ElementTypeNames} from "../../types";
 
 interface ContentProps {
   line: LineState
+  onLinesChange?: (lines: LineState[], isCreate?: boolean) => void
 }
 
 const Line: React.FC<ContentProps> = (props) => {
-  const {line} = props
-  const {updateLines, zoomTransformState} = useStore((state: FlowchartEditorState) => ({zoomTransformState: state.zoomTransformState, updateLines: state.updateLines}), shallow)
+  const {
+    line,
+    onLinesChange
+  } = props
 
   const handleLineTargetRef = useRef(null)
-
-  const handleMouseDown = (event: MouseEvent) => {
-    event.stopPropagation();
-    event.preventDefault()
-
-    const payload = setLineState({line, state: LineStateNames.Created})
-    updateLines([payload])
-  }
-
-  const handleMouseClick = (event: MouseEvent) => {
-  }
-
-  const handlePathClick = (event: React.MouseEvent | MouseEvent) => {
-  }
 
   const handlePathMouseDown = (event: MouseEvent, part: Part) => {
     const payloadLine = setLineState({line, state: LineStateNames.Updated})
     const payloadParts = setLineStatePart({parts: payloadLine.parts, part, state: PartStateNames.Updated})
 
-    updateLines([{...payloadLine, parts: payloadParts}])
+    onLinesChange && onLinesChange([{...payloadLine, parts: payloadParts}])
     return
   }
-
-  const handleMouseEnter = (event: MouseEvent, part: Part) => {
-  }
-
-  const handleMouseLeave = (event: MouseEvent, part: Part) => {
-  }
-
-  useEffect(() => {
-    const selectionHandleLineTarget = select(handleLineTargetRef.current)
-
-    selectionHandleLineTarget.on('mousedown', handleMouseDown)
-    selectionHandleLineTarget.on('click', handleMouseClick)
-  }, [line])
-
 
   return (
     <g className={'flowchart-editor_line'}>
@@ -72,14 +46,12 @@ const Line: React.FC<ContentProps> = (props) => {
         parts={line.parts}
         selected={line.state === LineStateNames.Selected}
         MarkerProps={{type: getMarkerType(line)}}
-        onClick={handlePathClick}
         onMouseDown={handlePathMouseDown}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
       />
       <TextPath href={`#${line.id}`} text={line.id}/>
       <circle
         data-id={line.id}
+        data-element-type={ElementTypeNames.LineHandle}
         ref={handleLineTargetRef}
         className={'flowchart-editor_handle-line'}
         cx={getLineTargetPosition(line.parts).x}

@@ -7,28 +7,28 @@ export enum NodeStateNames {
   Selected = 'selected'
 }
 
-export interface NodeDTO{
+export interface NodeDTO<T = any>{
   id?: string
   type?: string
   state?: NodeStateNames
+  data?: T
   width?: number
   height?: number
   position?: Position
   drag?: boolean
 }
 
-export interface NodeValues{
+export interface NodeValues<T = any>{
   id: string
   type: string
   state: NodeStateNames
+  data: T
   width: number
   height: number
   position: Position
   drag: boolean
 }
 
-export interface NodeActions{
-
-}
+export interface NodeActions{}
 
 export type NodeState = NodeValues & NodeActions

@@ -1,4 +1,5 @@
 import * as React from 'react'
+import {ElementTypeNames} from "../../types";
 
 interface TextPathProps{
   href: string
@@ -9,7 +10,7 @@ const TextPath: React.FC<TextPathProps> = (props) => {
 
   return(
     <text dy={'-4px'}>
-      <textPath href={href} startOffset="50%" textAnchor="middle">{text}</textPath>
+      <textPath data-element-type={ElementTypeNames.LineText} href={href} startOffset="50%" textAnchor="middle">{text}</textPath>
     </text>
   )
 }

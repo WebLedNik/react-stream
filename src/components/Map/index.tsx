@@ -38,10 +38,10 @@ const Map: React.FC<MapProps> = () => {
     const scaleX = minimapScaleX(zoomTransformState.k, width).invert(-zoomTransformState.k + width);
     const scaleY = minimapScaleY(zoomTransformState.k, height).invert(-zoomTransformState.k + height);
 
-    // const minXPos = Math.min(...nodes.map(n => n.position.x))
-    // const maxXPos = Math.max(...nodes.map(n => n.position.x))
-    // const minYPos = Math.min(...nodes.map(n => n.position.y))
-    // const maxYPos = Math.max(...nodes.map(n => n.position.y))
+    // const minXPos = Math.min(...Nodes.map(n => n.position.x))
+    // const maxXPos = Math.max(...Nodes.map(n => n.position.x))
+    // const minYPos = Math.min(...Nodes.map(n => n.position.y))
+    // const maxYPos = Math.max(...Nodes.map(n => n.position.y))
 
     // const viewBoxWidth = viewBox.width + (viewBox.width - width)
     // const viewBoxHeight =  viewBox.height + (viewBox.height - height)

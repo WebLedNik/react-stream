@@ -32,27 +32,13 @@ const createStore = () => create<FlowchartEditorState>((setState, getState) => (
   setNodes: (nodes: NodeState[]) => {
     setState({nodes})
   },
+  setLines: (lines: LineState[]) => {
+    setState({lines})
+  },
   removeNodes(nodes: NodeState['id'][]) {
     const payload = getState().nodes.filter(node => !nodes.includes(node.id))
 
     setState({nodes: payload})
-  },
-  setLinesWithoutDTO: (lines: LineState[]) => {
-    setState({lines: [...lines, ...getState().lines]})
-  },
-  setLines: (lines: LineDTO[]) => {
-    const payload = lines.map(line => new LineCreator(line))
-    setState({lines: [...payload, ...getState().lines]})
-  },
-  updateLines: (lines: LineState[]) => {
-    const payload = getState().lines.map(line => {
-      const updatedLine = lines.find(item => item.id === line.id)
-
-      if (updatedLine) return updatedLine
-      return line
-    })
-
-    setState({lines: payload})
   },
   removeLines(lines: LineState['id'][]) {
     const payload = getState().lines.filter(line => !lines.includes(line.id))

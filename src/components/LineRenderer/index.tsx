@@ -6,21 +6,25 @@ import Line, {LineState} from "../Line";
 import {FlowchartEditorState, useStore} from "../../store";
 import shallow from "zustand/shallow";
 import {useEffect} from "react";
+import {ElementTypeNames} from "../../types";
 
 export interface LineRendererProps {
+  onLinesChange?: (lines: LineState[], isCreate?: boolean) => void
 }
 
 const LineRenderer: React.FC<LineRendererProps> = (props) => {
-  const {} = props
+  const {
+    onLinesChange
+  } = props
   const lines = useStore((state: FlowchartEditorState) => state.lines, shallow)
 
   return (
-    <svg className={'flowchart-editor_lines'}>
+    <svg className={'flowchart-editor_lines'} data-element-type={ElementTypeNames.EditorLines}>
       <defs>
         <Markers/>
       </defs>
       <g>
-        {lines.map(line => <Line key={line.id} line={line}/>)}
+        {lines.map(line => <Line key={line.id} line={line} onLinesChange={onLinesChange}/>)}
       </g>
     </svg>
   )

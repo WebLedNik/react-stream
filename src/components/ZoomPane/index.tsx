@@ -10,7 +10,7 @@ import {getIsLineModified, LineStateNames, setLinePart, setLineState, setLineTra
 import useEventListener from "../../hooks/useEventListener";
 
 export interface ZoomPaneProps extends PropsWithChildren {
-  onDoubleClick?:(event: MouseEvent) => void
+  onDoubleClick?: (event: MouseEvent) => void
 }
 
 const ZoomPane: React.FC<ZoomPaneProps> = ({children, ...props}) => {
@@ -20,34 +20,9 @@ const ZoomPane: React.FC<ZoomPaneProps> = ({children, ...props}) => {
     zoomTransformState,
     setZoomTransformState,
     nodes,
-    lines,
-    updateLines
+    lines
   }: FlowchartEditorState = useStore((state) => state)
 
-  const handleMouseUp = (event: MouseEvent) => {
-    event.preventDefault()
-
-    const line = lines.find(l => getIsLineModified(l.state))
-    if (!line) return
-
-    const x = (event.x - zoomTransformState.x) / zoomTransformState.k
-    const y = (event.y - zoomTransformState.y) / zoomTransformState.k
-
-    const payload = setLineTransform({line: line, position: {x, y}})
-    updateLines([payload])
-  }
-  const handleMouseMove = (event: MouseEvent) => {
-    event.preventDefault()
-
-    const line = lines.find(l => getIsLineModified(l.state))
-    if (!line) return
-
-    const x = (event.x - zoomTransformState.x) / zoomTransformState.k
-    const y = (event.y - zoomTransformState.y) / zoomTransformState.k
-
-    const payload = setLinePart({currentLine: line, position: {x, y}})
-    payload && updateLines([payload])
-  }
   const handleDoubleClick = (event: MouseEvent) => {
     event.preventDefault()
     event.stopPropagation()
@@ -55,8 +30,6 @@ const ZoomPane: React.FC<ZoomPaneProps> = ({children, ...props}) => {
     onDoubleClick && onDoubleClick(event)
   }
 
-  useEventListener("mouseup", handleMouseUp, refZoomPane)
-  useEventListener("mousemove", handleMouseMove, refZoomPane)
   useEventListener("dblclick", handleDoubleClick, refZoomPane)
   useEffect(() => {
     const selection = select(refZoomPane.current)
