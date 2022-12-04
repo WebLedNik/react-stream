@@ -2,8 +2,15 @@ import createContext from "zustand/context";
 import {FlowchartEditorState, FlowchartEditorValues} from "./types";
 import create from "zustand";
 import {zoomIdentity, ZoomTransform} from "d3-zoom";
-import {Node, NodeDTO, NodeState} from "../components/Node";
-import {Line, LineDTO, LineState, LineValues} from "../components/Line";
+import {
+  NodeCreator,
+  NodeDTO,
+  NodeState,
+  LineCreator,
+  LineDTO,
+  LineState
+} from "../components";
+import {ComponentType} from "react";
 
 // @ts-ignore
 const {Provider, useStore, useStoreApi } = createContext<FlowchartEditorState>()
@@ -11,6 +18,7 @@ const {Provider, useStore, useStoreApi } = createContext<FlowchartEditorState>()
 const initialState:FlowchartEditorValues = {
   width: 0,
   height: 0,
+  nodeTypes: {},
   nodes: [],
   lines: [],
   zoomTransformState: zoomIdentity
@@ -18,29 +26,22 @@ const initialState:FlowchartEditorValues = {
 
 const createStore = () => create<FlowchartEditorState>((setState, getState) => ({
   ...initialState,
-  setNodes: (nodes: NodeDTO[]) => {
-    const payload = nodes.map(node => new Node(node))
-    setState({nodes: [...payload, ...getState().nodes]})
+  setNodeTypes: (payload: {[key: string]: ComponentType<any>}) => {
+    setState({nodeTypes: payload})
   },
-  updateNodes: (nodes: NodeState[]) => {
-    const payload = getState().nodes.map(node => {
-      const updatedNode = nodes.find(item => item.id === node.id)
-
-      if (updatedNode){
-        return {...node, ...updatedNode}
-      }
-
-      return node
-    })
-    setState({nodes: payload})
+  setNodes: (nodes: NodeState[]) => {
+    setState({nodes})
   },
   removeNodes(nodes: NodeState['id'][]) {
     const payload = getState().nodes.filter(node => !nodes.includes(node.id))
 
     setState({nodes: payload})
   },
+  setLinesWithoutDTO: (lines: LineState[]) => {
+    setState({lines: [...lines, ...getState().lines]})
+  },
   setLines: (lines: LineDTO[]) => {
-    const payload = lines.map(line => new Line(line))
+    const payload = lines.map(line => new LineCreator(line))
     setState({lines: [...payload, ...getState().lines]})
   },
   updateLines: (lines: LineState[]) => {

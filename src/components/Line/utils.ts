@@ -984,7 +984,7 @@ function getNextPart({parts, part}: { parts: Part[], part: Part }): Part | undef
 }
 
 
-export class Line implements LineState {
+export class LineCreator implements LineState {
   id: string;
   source: LineValues['source']
   target: LineValues['target']

@@ -6,7 +6,6 @@ import {v4 as uuidv4} from 'uuid';
 import {select} from "d3-selection";
 import {FlowchartEditorState, useStore} from "../../store";
 import {
-  Line,
   LineStateNames,
   getLineDTO,
   setLineTarget,
@@ -28,7 +27,7 @@ interface HandleProps {
 const Handle: React.FC<HandleProps> = (props) => {
   const {node, direction, type} = props
   const handleRef = useRef<HTMLDivElement>(null)
-  const {zoomTransformState, lines, setLines, updateLines, updateNodes}: FlowchartEditorState = useStore((state) => state)
+  const {zoomTransformState, lines, setLines, updateLines}: FlowchartEditorState = useStore((state) => state)
   const handleId = useMemo(() => uuidv4(), [])
 
   const handleMouseDown = (event: MouseEvent) => {

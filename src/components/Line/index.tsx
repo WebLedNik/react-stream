@@ -90,7 +90,7 @@ const Line: React.FC<ContentProps> = (props) => {
   )
 }
 
-export default React.memo(Line)
+export default Line
 
 export * from './types'
 export * from './utils'

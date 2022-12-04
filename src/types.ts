@@ -14,3 +14,8 @@ export enum Orientation {
   Horizontal = "horizontal",
   Vertical = "vertical"
 };
+
+export interface SizeProps{
+  width: number
+  height: number
+}

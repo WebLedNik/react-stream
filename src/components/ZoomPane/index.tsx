@@ -21,7 +21,6 @@ const ZoomPane: React.FC<ZoomPaneProps> = ({children, ...props}) => {
     setZoomTransformState,
     nodes,
     lines,
-    updateNodes,
     updateLines
   }: FlowchartEditorState = useStore((state) => state)
 

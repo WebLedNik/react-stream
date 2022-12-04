@@ -8,6 +8,9 @@ export enum NodeStateNames {
 }
 
 export interface NodeDTO{
+  id?: string
+  type?: string
+  state?: NodeStateNames
   width?: number
   height?: number
   position?: Position
@@ -16,6 +19,7 @@ export interface NodeDTO{
 
 export interface NodeValues{
   id: string
+  type: string
   state: NodeStateNames
   width: number
   height: number

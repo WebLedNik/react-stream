@@ -1,1 +1,15 @@
-export {default as FlowchartEditor} from './components/FlowchartEditor'
+export {FlowchartEditor} from './components'
+export type {
+  NodeState,
+  LineState,
+  NodeDTO,
+  LineDTO,
+} from './components'
+export {
+  NodeCreator,
+  LineCreator
+} from './components'
+export type {
+  NodeTypes
+} from './store'
+export * from './hooks'

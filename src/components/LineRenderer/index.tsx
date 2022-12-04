@@ -27,6 +27,6 @@ const LineRenderer: React.FC<LineRendererProps> = (props) => {
 }
 
 LineRenderer.displayName = 'FlowchartLineRenderer'
-export default React.memo(LineRenderer)
+export default LineRenderer
 
 export * from './types'

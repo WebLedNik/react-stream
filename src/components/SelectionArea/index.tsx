@@ -11,18 +11,20 @@ interface SelectionAreaProps {
   container?: HTMLElement | null
   dragContainer?: HTMLElement | null
   selectableTargets?: Array<string>
+  onNodesChange?:(nodes: NodeState[]) => void
 }
 
 const SelectionArea: React.FC<SelectionAreaProps> = (props) => {
   const {
+    onNodesChange
+  } = props
+  const {
     nodes,
     lines,
-    updateNodes,
     updateLines
   } = useStore((state: FlowchartEditorState) => ({
     nodes: state.nodes,
     lines: state.lines,
-    updateNodes: state.updateNodes,
     updateLines: state.updateLines
   }), shallow)
 
@@ -40,7 +42,7 @@ const SelectionArea: React.FC<SelectionAreaProps> = (props) => {
     if (IS_SHIFT_BTN) return
     // Сброс выделенных объектов
     if (event.button === LEFT_MOUSE_BTN) {
-      updateNodes(nodes.map(n => ({...n, state: NodeStateNames.Fixed})))
+      onNodesChange && onNodesChange(nodes.map(n => ({...n, state: NodeStateNames.Fixed})))
       updateLines(lines.map(l => setLineState({line: l, state: LineStateNames.Fixed})))
     }
   }
