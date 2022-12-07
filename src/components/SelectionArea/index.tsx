@@ -36,6 +36,9 @@ const SelectionArea: React.FC<SelectionAreaProps> = (props) => {
   const handleContainerClick = (event: MouseEvent) => {
     event.preventDefault()
 
+    const target = event.target as HTMLElement
+    if (!target) return;
+
     const LEFT_MOUSE_BTN = 0
     const IS_SHIFT_BTN = event.shiftKey
 

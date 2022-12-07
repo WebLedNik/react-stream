@@ -6,6 +6,7 @@ import {FlowchartEditorState, useStore} from "../../store";
 import shallow from "zustand/shallow";
 import {NodeState, NodeStateNames} from "../Node";
 import {LineState, LineStateNames} from "../Line";
+import EventsManagement from "../EventsManagement";
 
 interface KeyManagementProps {
   onNodesDelete?: (nodes: NodeState[]) => void
@@ -36,7 +37,7 @@ const KeyManagement: React.FC<KeyManagementProps> = (props) => {
     ) {
       const deleteableNodes = nodes.filter(n => n.state === NodeStateNames.Selected)
       const deleteableLines = lines.filter(l => l.state === LineStateNames.Selected)
-      console.log({deleteableLines})
+
       onNodesDelete && onNodesDelete(deleteableNodes)
       onLinesDelete && onLinesDelete(deleteableLines)
     }
@@ -53,4 +54,5 @@ const KeyManagement: React.FC<KeyManagementProps> = (props) => {
   )
 }
 
+KeyManagement.displayName = 'FlowchartKeyManagement'
 export default KeyManagement

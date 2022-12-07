@@ -42,9 +42,7 @@ const Line: React.FC<ContentProps> = (props) => {
   return (
     <g className={'flowchart-editor_line'}>
       <Path
-        id={line.id}
-        parts={line.parts}
-        selected={line.state === LineStateNames.Selected}
+        line={line}
         MarkerProps={{type: getMarkerType(line)}}
         onMouseDown={handlePathMouseDown}
       />
@@ -62,7 +60,8 @@ const Line: React.FC<ContentProps> = (props) => {
   )
 }
 
-export default Line
+Line.displayName = 'FlowchartLine'
+export default React.memo(Line)
 
 export * from './types'
 export * from './utils'

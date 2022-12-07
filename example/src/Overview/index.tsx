@@ -25,7 +25,7 @@ const Overview: React.FC<OverviewProps> = () => {
   }), [])
 
   const handleAddNodeTypeStart = (event: React.MouseEvent) => {
-    setNodes([...nodes, {id: String(nodes.length), type: NodeTypeNames.Start, width: 50, height: 50}])
+    setNodes([...nodes, {id: String(nodes.length), type: NodeTypeNames.Start, width: 80, height: 80}])
   }
   const handleAddNodeTypeProcess= (event: React.MouseEvent) => {
     setNodes([...nodes, {id: String(nodes.length), type: NodeTypeNames.Process, width: 200, height: 150}])
@@ -40,7 +40,6 @@ const Overview: React.FC<OverviewProps> = () => {
     setNodes(nodes.filter(n => !values.map(el => el.id).includes(n.id)))
   }
   const handleLinesDelete = (values: LineState[]) => {
-    console.log({values})
     setLines(lines.filter(l => !values.map(el => el.id).includes(l.id)))
   }
 

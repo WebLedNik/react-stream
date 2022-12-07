@@ -1,5 +1,6 @@
-import {Directions, Orientation, Position} from "../types";
-import {isEmpty, isEqual, xorWith} from 'lodash'
+import {Directions, ElementTypeNames, Orientation, Position} from "../types";
+import {compact, isEmpty, isEqual, xorWith} from 'lodash'
+import {LineState, NodeState} from "../components";
 
 export function getTransformTranslateScaleStyle(position: Position & {k: number}){
   return `transform: translate(${position.x}px, ${position.y}px) scale(${position.k})`
@@ -86,4 +87,26 @@ export function isEqualArray(prev: any[], next: any[]): boolean{
 
 export function getInvertedOrientation(orientation: Orientation): Orientation {
   return (orientation === Orientation.Horizontal) ? Orientation.Vertical : Orientation.Horizontal
+}
+
+export function getNodesUseDepthFirstSearch(vertex: string, edges: {source: string, target: string}[], visitedVertex: string[] = [], stack: string[] = []):string[]{
+  // Находим все соседние вершины для текущей. Отфилтьровывем соседние вершины от текущей и уже посещенных вершин.
+  const neighboringVertexes: string[] = compact(edges.filter(e => e.source === vertex).map(e => e.target)).filter(v => v !== vertex).filter(v => !visitedVertex.includes(v!));
+  // Помещаем соседние вершины в стек
+  stack = [...neighboringVertexes, ...stack];
+  // Добавляем текущую вершину в список посещенных
+  visitedVertex.push(vertex);
+  // Выбираем следующую вершину из стека
+  const nextVertex = stack.shift();
+  // Если следующей вершины нет => вовзращаем список посещенных вершин.
+  return nextVertex ? getNodesUseDepthFirstSearch(nextVertex, edges, visitedVertex, stack) : visitedVertex;
+}
+
+export function isValidTargetElement(element: HTMLElement){
+  switch (element.tagName) {
+    case 'BUTTON':
+      return false
+    default:
+      return true
+  }
 }

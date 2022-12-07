@@ -1,14 +1,13 @@
 import * as React from 'react'
-import {forwardRef, PropsWithChildren, useEffect} from "react";
+import {forwardRef, PropsWithChildren} from 'react'
 import Wrapper from "./Wrapper";
 import GraphView from "../GraphView";
-import Controls from "../Controls";
 import SelectionArea from "../SelectionArea";
 import {NodeState} from "../Node";
-import {LineDTO, LineState} from "../Line";
+import {LineState} from "../Line";
 import StoreUpdater from "../StoreUpdater";
 import {NodeTypes} from "../../store";
-import ConnectionManagement from "../ConnectionManagement";
+import EventsManagement from "../EventsManagement";
 import KeyManagement from "../KeyManagement";
 
 export interface FlowchartEditorProps extends PropsWithChildren {
@@ -16,12 +15,13 @@ export interface FlowchartEditorProps extends PropsWithChildren {
   lines?: LineState[]
   nodeTypes?: NodeTypes
   onConnect?: (line: LineState) => void
+  onDoubleClick?:(event: MouseEvent) => void
   onNodesChange?:(nodes: NodeState[]) => void
   onLinesChange?:(lines: LineState[], isCreate?: boolean) => void
-  onNodeDragStop?:(nodes: NodeState[]) => void
-  onDoubleClick?:(event: MouseEvent) => void
   onNodesDelete?: (nodes: NodeState[]) => void
-  onLinesDelete?: (nodes: LineState[]) => void
+  onLinesDelete?: (lines: LineState[]) => void
+  onNodeDragStop?:(nodes: NodeState[]) => void
+  onNodeContextMenu?: (event: MouseEvent, element: HTMLElement) => void
 }
 
 export type FlowchartEditorRefProps = HTMLDivElement
@@ -37,7 +37,8 @@ const FlowchartEditor = forwardRef<FlowchartEditorRefProps, FlowchartEditorProps
     onConnect,
     onLinesChange,
     onNodesDelete,
-    onLinesDelete
+    onLinesDelete,
+    onNodeContextMenu
   } = props
 
   return (
@@ -45,10 +46,10 @@ const FlowchartEditor = forwardRef<FlowchartEditorRefProps, FlowchartEditorProps
         <Wrapper>
           {children}
           <GraphView
-            onDoubleClickZoomPane={onDoubleClick}
             onNodeDragStop={onNodeDragStop}
             onNodesChange={onNodesChange}
             onLinesChange={onLinesChange}
+            onNodeContextMenu={onNodeContextMenu}
           />
           <SelectionArea
             onNodesChange={onNodesChange}
@@ -58,9 +59,10 @@ const FlowchartEditor = forwardRef<FlowchartEditorRefProps, FlowchartEditorProps
             onNodesDelete={onNodesDelete}
             onLinesDelete={onLinesDelete}
           />
-          <ConnectionManagement
+          <EventsManagement
             onConnect={onConnect}
             onLinesChange={onLinesChange}
+            onNodesChange={onNodesChange}
           />
           <StoreUpdater
             nodes={nodes}

@@ -3,6 +3,7 @@ import {NodeState} from "../Node";
 import {useEffect} from "react";
 import {FlowchartEditorState, NodeTypes, useStore} from "../../store";
 import {LineState} from "../Line";
+import KeyManagement from "../KeyManagement";
 
 interface StoreUpdaterProps{
   nodes?: NodeState[]
@@ -38,4 +39,5 @@ const StoreUpdater: React.FC<StoreUpdaterProps> = (props) => {
   )
 }
 
+StoreUpdater.displayName = 'FlowchartStoreUpdater'
 export default StoreUpdater

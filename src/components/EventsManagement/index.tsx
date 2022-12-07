@@ -3,37 +3,42 @@ import {useEffect, useState} from 'react'
 import useEventListener from "../../hooks/useEventListener";
 import {ElementTypeNames, Position} from "../../types";
 import {getHandleProps, HandleTypeNames} from "../Handle";
-import {getNodeProps} from "../Node";
-import {getRelativePosition} from "../../utils";
+import {getNodeProps, NodeState, NodeStateNames} from "../Node";
+import {getRelativePosition, isValidTargetElement} from "../../utils";
 import {FlowchartEditorState, useStore} from "../../store";
 import shallow from "zustand/shallow";
 import {
   getIsLineModified,
-  getLineDTO, getLineElement,
+  getLineDTO,
   LineCreator,
-  LineDTO,
-  LineState, LineStateNames,
-  setLinePart, setLineState,
+  LineState,
+  LineStateNames,
+  setLinePart,
+  setLineState,
   setLineTarget,
   setLineTransform
 } from "../Line";
 
-interface ConnectionManagementProps {
+interface EventsManagementProps {
   onConnect?: (line: LineState) => void
   onLinesChange?: (lines: LineState[], isCreate?: boolean) => void
+  onNodesChange?:(nodes: NodeState[]) => void
 }
 
-const ConnectionManagement: React.FC<ConnectionManagementProps> = (props) => {
+const EventsManagement: React.FC<EventsManagementProps> = (props) => {
   const {
     onConnect,
-    onLinesChange
+    onLinesChange,
+    onNodesChange,
   } = props
   const {
     zoomTransformState,
     lines,
+    nodes
   } = useStore((state: FlowchartEditorState) => ({
     zoomTransformState: state.zoomTransformState,
     lines: state.lines,
+    nodes: state.nodes
   }), shallow)
 
   const [container, setContainer] = useState<HTMLElement>(document.body)
@@ -92,7 +97,6 @@ const ConnectionManagement: React.FC<ConnectionManagementProps> = (props) => {
     //Проверяем тип элемента
     if (
       target.dataset.elementType === ElementTypeNames.LineHandle ||
-      target.dataset.elementType === ElementTypeNames.EditorLines ||
       target.dataset.elementType === ElementTypeNames.Path
     ) {
       //Останавливаем событие
@@ -185,6 +189,22 @@ const ConnectionManagement: React.FC<ConnectionManagementProps> = (props) => {
 
     const target = event.target as HTMLElement
     if (!target) return
+    if (!isValidTargetElement(target)) return;
+
+    const nodeElement = (target.dataset.elementType === ElementTypeNames.Node) ? target : target.closest(`[data-element-type=${ElementTypeNames.Node}]`) as HTMLElement
+
+    if (nodeElement){
+      //Останавливаем событие
+      event.stopPropagation()
+      //Находим node
+      const node = nodes.find(n => n.id === (nodeElement.dataset.id ?? ''))
+      if (!node) return;
+      //Обновляем node
+      const payload = {...node, state: NodeStateNames.Selected}
+
+      onNodesChange && onNodesChange([payload])
+      return;
+    }
 
     if (target.dataset.elementType === ElementTypeNames.Path){
       //Останавливаем событие
@@ -214,4 +234,5 @@ const ConnectionManagement: React.FC<ConnectionManagementProps> = (props) => {
   )
 }
 
-export default ConnectionManagement
+EventsManagement.displayName = 'FlowchartEventsManagement'
+export default EventsManagement

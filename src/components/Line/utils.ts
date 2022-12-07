@@ -17,7 +17,7 @@ import {
   SetLineTargetProps,
   SetLineTransformProps,
 } from "./types";
-import {Directions, Orientation, Position} from "../../types";
+import {Directions, ElementTypeNames, Orientation, Position} from "../../types";
 import {getOrientationFromDirection} from "../Handle";
 import {MarkerTypeNames} from "../LineRenderer";
 import {getInvertedOrientation, getRootElement} from "../../utils";
@@ -1079,7 +1079,7 @@ export function getLineElement(id: string): HTMLDivElement | undefined | null {
   return rootElement.querySelector(`[data-id='${id}']`) as HTMLDivElement
 }
 
-export function getLineProps(id: string): Pick<LineValues, 'id'> | undefined {
+export function getLineProps(id: string): Pick<LineState, 'id'> | undefined {
   const rootElement = getRootElement()
   if (!rootElement) return
 
@@ -1087,4 +1087,17 @@ export function getLineProps(id: string): Pick<LineValues, 'id'> | undefined {
   if (!line) return
 
   return {id}
+}
+
+export function getLinesFromDOM(): Array<Pick<LineState, 'id'> & {source: string, target: string}>{
+  const rootElement = getRootElement()
+  if (!rootElement) return []
+
+  let result: Array<Pick<LineState, 'id'> & {source: string, target: string}> = []
+
+  document.body.querySelectorAll(`[data-element-type=${ElementTypeNames.Path}]`).forEach((el: HTMLElement) => {
+    result.push({id: el.dataset.id ?? '', source: el.dataset.source ?? '', target: el.dataset.target ?? ''})
+  })
+
+  return result
 }

@@ -2,7 +2,8 @@ export {
   FlowchartEditor,
   Background,
   Handle,
-  Controls
+  Controls,
+  getLinesFromDOM
 } from './components'
 export type {
   NodeState,
@@ -25,3 +26,6 @@ export {
   useLinesState,
   useNodesState
 } from './hooks'
+export {
+  getNodesUseDepthFirstSearch
+} from './utils'

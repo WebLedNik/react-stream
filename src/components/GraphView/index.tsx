@@ -11,20 +11,20 @@ export interface GraphViewProps {
   onLinesChange?: (lines: LineState[], isCreate?: boolean) => void
   onNodesChange?:(nodes: NodeState[]) => void
   onNodeDragStop?:(nodes: NodeState[]) => void
-  onDoubleClickZoomPane?:(event: MouseEvent) => void
+  onNodeContextMenu?: (event: MouseEvent, element: HTMLElement) => void
 }
 
 const GraphView: React.FC<GraphViewProps> = (props) => {
   const {
     onNodeDragStop,
     onNodesChange,
-    onDoubleClickZoomPane,
-    onLinesChange
+    onLinesChange,
+    onNodeContextMenu
   } = props
   return (
-    <ZoomPane onDoubleClick={onDoubleClickZoomPane}>
+    <ZoomPane>
       <Viewport>
-        <NodeRenderer onNodesChange={onNodesChange} onNodeDragStop={onNodeDragStop} onLinesChange={onLinesChange}/>
+        <NodeRenderer onNodeContextMenu={onNodeContextMenu} onNodesChange={onNodesChange} onNodeDragStop={onNodeDragStop} onLinesChange={onLinesChange}/>
         <LineRenderer onLinesChange={onLinesChange}/>
       </Viewport>
     </ZoomPane>

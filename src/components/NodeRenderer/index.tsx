@@ -10,17 +10,19 @@ export interface NodeRendererProps{
   onLinesChange?: (lines: LineState[], isCreate?: boolean) => void
   onNodesChange?:(nodes: NodeState[]) => void
   onNodeDragStop?:(nodes: NodeState[]) => void
+  onNodeContextMenu?: (event: MouseEvent, element: HTMLElement) => void
 }
 const NodeRenderer: React.FC<NodeRendererProps> = (props) => {
   const {
     onNodesChange,
     onNodeDragStop,
-    onLinesChange
+    onLinesChange,
+    onNodeContextMenu
   } = props
   const nodes = useStore((state: FlowchartEditorState) => state.nodes, shallow)
   return(
     <div className={'flowchart-editor_nodes'} data-element-type={ElementTypeNames.EditorNodes}>
-      {nodes.map(node => <Node key={node.id} node={node} onNodesChange={onNodesChange} onNodeDragStop={onNodeDragStop} onLinesChange={onLinesChange}/>)}
+      {nodes.map(node => <Node key={node.id} node={node} onNodesChange={onNodesChange} onNodeDragStop={onNodeDragStop} onLinesChange={onLinesChange} onNodeContextMenu={onNodeContextMenu}/>)}
     </div>
   )
 }

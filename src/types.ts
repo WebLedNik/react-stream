@@ -1,3 +1,5 @@
+import {LineState, NodeState} from "./components";
+
 export interface Position{
   x: number
   y: number
@@ -31,7 +33,6 @@ export interface SizeProps{
   height: number
 }
 
-// Key values constants
 // Available values for `KeyboardEvent.key` attribute.
 export const VALUE_CANCEL = 'Cancel';
 export const VALUE_HELP = 'Help';

@@ -5,17 +5,19 @@ import {FlowchartEditorState, useStore} from "../../store";
 import {select} from "d3-selection";
 import {drag} from "d3-drag";
 import {NodeState, NodeStateNames} from "./types";
-import {getRelativePosition, getTransformTranslateStyle} from "../../utils";
+import {getRelativePosition, getTransformTranslateStyle, isValidTargetElement} from "../../utils";
 import {ElementTypeNames, Position, SizeProps} from "../../types";
 import {LineState, setLineSourcePosition, setLineTargetPosition} from "../Line";
 import shallow from "zustand/shallow";
 import Moveable from "react-moveable";
+import useEventListener from "../../hooks/useEventListener";
 
 export interface NodeProps extends PropsWithChildren{
   node: NodeState
   onNodesChange?: (nodes: NodeState[]) => void
   onLinesChange?:(lines: LineState[], isCreate?: boolean) => void
   onNodeDragStop?: (nodes: NodeState[]) => void
+  onNodeContextMenu?: (event: MouseEvent, element: HTMLElement) => void
 }
 
 
@@ -24,7 +26,8 @@ const Node:React.FC<NodeProps> = (props) => {
     node,
     onNodesChange,
     onNodeDragStop,
-    onLinesChange
+    onLinesChange,
+    onNodeContextMenu
   } = props
   const nodeRef = useRef<HTMLDivElement | null>(null)
   const {
@@ -40,11 +43,6 @@ const Node:React.FC<NodeProps> = (props) => {
   const nodeComponent = useMemo(() => nodeTypes[node.type] ? React.createElement(nodeTypes[node.type], {...node}) : <></>, [node.type])
 
   const [target, setTarget] = useState<HTMLDivElement | null | undefined>();
-
-  const handleClick = (event: React.MouseEvent) => {
-    const payload = {...node, state: NodeStateNames.Selected}
-    onNodesChange && onNodesChange([payload])
-  }
 
   const handleResizeEnd = (size: SizeProps) => {
     const payload = {...node, ...size}
@@ -84,22 +82,37 @@ const Node:React.FC<NodeProps> = (props) => {
     }
   }
 
+  const handleContextMenu = (event: MouseEvent) => {
+    event.preventDefault()
+
+    const target = event.target as HTMLElement
+    if (!target) return
+    if (!isValidTargetElement(target)) return;
+
+    const nodeElement = (target.dataset.elementType === ElementTypeNames.Node) ? target : target.closest(`[data-element-type=${ElementTypeNames.Node}]`) as HTMLElement
+
+    if (nodeElement){
+      event.stopPropagation()
+      onNodeContextMenu && onNodeContextMenu(event, nodeElement)
+    }
+  }
+
+  useEventListener("contextmenu", handleContextMenu)
+
   useEffect(() => {
     const selection = select(nodeRef.current)
 
-    selection.on('click', function (event, d){
-      event.preventDefault()
-      event.stopPropagation()
-
-      handleClick(event)
-    }, {capture: true})
-
     const dragBehavior = drag()
       .on('start', function (event, d) {
+        event.sourceEvent.preventDefault()
+
+        if (!isValidTargetElement(event.sourceEvent.target)) return;
         if (!node.drag) return
-        selection.raise()
       })
       .on('drag', function (event, d) {
+        event.sourceEvent.preventDefault()
+        if (!isValidTargetElement(event.sourceEvent.target)) return;
+
         if (!node.drag) return
 
         const nodePosition: Position = {
@@ -111,6 +124,8 @@ const Node:React.FC<NodeProps> = (props) => {
         setPositionLines({...node, position: nodePosition})
       })
       .on('end', function (event, d) {
+        event.sourceEvent.preventDefault()
+
         if (!node.drag) return
 
         const nodePosition: Position = {
@@ -170,7 +185,7 @@ const Node:React.FC<NodeProps> = (props) => {
 }
 
 Node.displayName = 'FlowchartNode'
-export default Node
+export default React.memo(Node)
 
 export * from './types'
 export * from './utils'

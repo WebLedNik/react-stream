@@ -19,7 +19,6 @@ const Process: React.FC<ProcessProps> = (props) => {
         <Handle id={'handle-' + uuidv4()} type={HandleTypeNames.Output} direction={Directions.Right}/>
         <Handle id={'handle-' + uuidv4()} type={HandleTypeNames.Input} direction={Directions.Left}/>
       </div>
-
     </div>
   )
 }
